@@ -16,6 +16,7 @@ model Auth {
 
   accessToken         String
   refreshToken        String?
+  scope               String[]
   expiresIn           Int?
   obtainmentTimestamp Int
 }
@@ -23,7 +24,7 @@ model Auth {
 model Message {
   id Int @id @default(autoincrement())
 
-  userd    String
-  username String
-  text     String
+  userId   String
+  userName String
+  message  String
 }

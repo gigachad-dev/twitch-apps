@@ -3,6 +3,7 @@ CREATE TABLE "Auth" (
     "id" SERIAL NOT NULL,
     "accessToken" TEXT NOT NULL,
     "refreshToken" TEXT,
+    "scope" TEXT[],
     "expiresIn" INTEGER,
     "obtainmentTimestamp" INTEGER NOT NULL,
 
@@ -12,8 +13,8 @@ CREATE TABLE "Auth" (
 -- CreateTable
 CREATE TABLE "Message" (
     "id" SERIAL NOT NULL,
-    "userId" INTEGER NOT NULL,
-    "userName" TEXT NOT NULL,
+    "userd" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
     "text" TEXT NOT NULL,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")

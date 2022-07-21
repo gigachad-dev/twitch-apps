@@ -1,22 +1,22 @@
-import { PrismaClient } from '@twitch-apps/prisma'
 import { RefreshingAuthProvider } from '@twurple/auth'
+import type { PrismaClient, Auth } from '@twitch-apps/prisma'
 import type { AccessToken } from '@twurple/auth'
 
 interface AuthProviderOpts {
   clientId: string
   clientSecret: string
   initialToken: AccessToken
-  prisma: PrismaClient
+  prismaClient: PrismaClient
 }
 
 export class AuthProvider extends RefreshingAuthProvider {
-  private prisma: PrismaClient
+  private readonly prisma: PrismaClient
 
   constructor({
     clientId,
     clientSecret,
     initialToken,
-    prisma
+    prismaClient
   }: AuthProviderOpts) {
     super(
       {
@@ -27,7 +27,13 @@ export class AuthProvider extends RefreshingAuthProvider {
       initialToken
     )
 
-    this.prisma = prisma
+    this.prisma = prismaClient
+  }
+
+  static async getTokens(prisma: PrismaClient): Promise<Auth | null> {
+    return await prisma.auth.findFirst({
+      where: { id: 1 }
+    })
   }
 
   private async onRefresh(token: AccessToken): Promise<void> {
