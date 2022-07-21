@@ -1,7 +1,7 @@
 {
-  "name": "node-esm",
+  "name": "twitch-apps",
   "version": "1.0.0",
-  "description": "node-esm",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev:apps": "pnpm -r --parallel --filter=./apps/* run dev",

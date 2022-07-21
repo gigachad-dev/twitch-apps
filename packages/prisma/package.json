@@ -1,0 +1,20 @@
+{
+  "name": "prisma",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "prisma generate && tsc",
+    "migrate": "prisma migrate dev",
+    "prepare": "pnpm build"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.1.0"
+  },
+  "devDependencies": {
+    "prisma": "^4.1.0"
+  }
+}
