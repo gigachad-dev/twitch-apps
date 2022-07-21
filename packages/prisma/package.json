@@ -1,5 +1,5 @@
 {
-  "name": "prisma",
+  "name": "@twitch-apps/prisma",
   "version": "1.0.0",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -8,8 +8,7 @@
   },
   "scripts": {
     "build": "prisma generate && tsc",
-    "migrate": "prisma migrate dev",
-    "prepare": "pnpm build"
+    "migrate": "prisma migrate dev"
   },
   "dependencies": {
     "@prisma/client": "^4.1.0"

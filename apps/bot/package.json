@@ -1,0 +1,16 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@twitch-apps/auth": "workspace:^1.0.0",
+    "@twitch-apps/prisma": "workspace:^1.0.0",
+    "@twurple/chat": "^5.1.7",
+    "dotenv": "^16.0.1",
+    "envalid": "^7.3.1",
+    "rotating-file-stream": "^3.0.4"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@twitch-apps/auth",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@twitch-apps/prisma": "workspace:*",
+    "@twurple/auth": "^5.1.7"
+  }
+}

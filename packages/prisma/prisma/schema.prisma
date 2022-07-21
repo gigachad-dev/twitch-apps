@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -11,6 +11,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Auth {
+  id Int @id @default(autoincrement())
+
+  accessToken         String
+  refreshToken        String?
+  expiresIn           Int?
+  obtainmentTimestamp Int
+}
+
 model Message {
-  id Int @id
+  id Int @id @default(autoincrement())
+
+  userd    String
+  username String
+  text     String
 }
