@@ -7,8 +7,8 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
+      POSTGRES_USER: bot
+      POSTGRES_PASSWORD: bot
       POSTGRES_DB: bot
     ports:
       - 5432:5432
