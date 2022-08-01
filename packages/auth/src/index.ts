@@ -1,5 +1,5 @@
+import type { Auth, PrismaClient } from '@twitch-apps/prisma'
 import { RefreshingAuthProvider } from '@twurple/auth'
-import type { PrismaClient, Auth } from '@twitch-apps/prisma'
 import type { AccessToken } from '@twurple/auth'
 
 interface AuthProviderOpts {
