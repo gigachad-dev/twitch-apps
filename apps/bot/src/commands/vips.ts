@@ -1,15 +1,27 @@
-import { BaseCommand } from "./base-command"
-import { ChatClient, PrivateMessage } from "@twurple/chat/lib/index.js"
+import { PrivateMessage } from '@twurple/chat/lib/index.js'
+import { CoreClient } from '../core.js'
+import { BaseCommand } from './base-command.js'
 
-export class Vips extends BaseCommand {
-  constructor(
-    private readonly chat: ChatClient
-  ) {
-    super({ alias: '!vips' })
+export class Vips extends BaseCommand<number> {
+  constructor(client: CoreClient) {
+    super(client, {
+      name: 'test',
+      userlevel: 'everyone',
+      args: {
+        defaultValue: 100,
+        convert(value) {
+          const num = Number(value)
+          if (isNaN(num)) {
+            return this.defaultValue!
+          }
+
+          return num
+        }
+      }
+    })
   }
 
-  async execute(chat: PrivateMessage, channel: string): Promise<void> {
-    const vips = await this.chat.getVips(channel)
-    this.chat.say(channel, vips.join(', '))
+  execute(chat: PrivateMessage, args: string[]) {
+    this.actionReply(`hello world ${args.join(' ')}`)
   }
 }

@@ -26,6 +26,7 @@ importers:
     specifiers:
       '@twitch-apps/auth': workspace:^1.0.0
       '@twitch-apps/prisma': workspace:^1.0.0
+      '@twurple/api': ^5.2.0
       '@twurple/chat': ^5.1.8
       dotenv: ^16.0.1
       envalid: ^7.3.1
@@ -33,6 +34,7 @@ importers:
     dependencies:
       '@twitch-apps/auth': link:../../packages/auth
       '@twitch-apps/prisma': link:../../packages/prisma
+      '@twurple/api': 5.2.0_@twurple+auth@5.1.8
       '@twurple/chat': 5.1.8_@twurple+auth@5.1.8
       dotenv: 16.0.1
       envalid: 7.3.1
@@ -360,6 +362,10 @@ packages:
     resolution: {integrity: sha512-wlw3HwEanJFJKctwLzhfOM6LKwR70FPfGZGoKOhWBKyOPXk+3a9Cc6S9zhm6tka7xKtpmfxVIReGUwPnMbIaZg==}
     dev: false
 
+  /@d-fischer/detect-node/3.0.1:
+    resolution: {integrity: sha512-0Rf3XwTzuTh8+oPZW9SfxTIiL+26RRJ0BRPwj5oVjZFyFKmsj9RGfN2zuTRjOuA3FCK/jYm06HOhwNK+8Pfv8w==}
+    dev: false
+
   /@d-fischer/escape-string-regexp/5.0.0:
     resolution: {integrity: sha512-7eoxnxcto5eVPW5h1T+ePnVFukmI9f/ZR9nlBLh1t3kyzJDUNor2C+YW9H/Terw3YnbZSDgDYrpCJCHtOtAQHw==}
     engines: {node: '>=10'}
@@ -403,6 +409,16 @@ packages:
     dependencies:
       '@d-fischer/logger': 4.2.0
       '@d-fischer/promise.allsettled': 2.0.2
+      '@types/node': 12.20.55
+      tslib: 2.4.0
+    dev: false
+
+  /@d-fischer/rate-limiter/0.6.1:
+    resolution: {integrity: sha512-SqsMxs77c/W9knmcX9ccy12ASq+E5UXzxU/ZIDAhZyll+2IqyikhgLQUu5n7bdxb3kox+TOSCIEFxDSSaGhcTA==}
+    dependencies:
+      '@d-fischer/logger': 4.2.0
+      '@d-fischer/promise.allsettled': 2.0.2
+      '@d-fischer/shared-utils': 3.2.0
       '@types/node': 12.20.55
       tslib: 2.4.0
     dev: false
@@ -552,13 +568,31 @@ packages:
       - encoding
     dev: false
 
-  /@twurple/api-call/5.1.8:
-    resolution: {integrity: sha512-C1oK3rOcj5SV4rMFNLWoCAH9LBJiqSCYVAKsO87tGh+BubegOdLILy1JTpjdXHZvF+QD2dIzgjbmJkOtbPIxWg==}
+  /@twurple/api-call/5.2.0:
+    resolution: {integrity: sha512-dr12OoFd+1BROVLLIDlpo6K+K3aGdK13FG0zBjHbDvtLLQNY2OrSL/tGfcPUnfrffYaLGsu+xgZq+BrDbfdqww==}
     dependencies:
       '@d-fischer/cross-fetch': 4.1.0
       '@d-fischer/qs': 7.0.2
-      '@twurple/common': 5.1.8
+      '@twurple/common': 5.2.0
       '@types/node-fetch': 2.6.2
+      tslib: 2.4.0
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@twurple/api/5.2.0_@twurple+auth@5.1.8:
+    resolution: {integrity: sha512-ujALhaqWeJUiHShIYYbzj3AviYF5D7sdJAJj13E7D0oAsLio98i4QUqPuqt1LCkAblpn0CacNLsajATwpRlHbg==}
+    peerDependencies:
+      '@twurple/auth': ^5.0.0
+    dependencies:
+      '@d-fischer/cache-decorators': 3.0.0
+      '@d-fischer/detect-node': 3.0.1
+      '@d-fischer/logger': 4.2.0
+      '@d-fischer/rate-limiter': 0.6.1
+      '@d-fischer/shared-utils': 3.2.0
+      '@twurple/api-call': 5.2.0
+      '@twurple/auth': 5.1.8
+      '@twurple/common': 5.2.0
       tslib: 2.4.0
     transitivePeerDependencies:
       - encoding
@@ -581,8 +615,8 @@ packages:
     dependencies:
       '@d-fischer/logger': 4.2.0
       '@d-fischer/shared-utils': 3.2.0
-      '@twurple/api-call': 5.1.8
-      '@twurple/common': 5.1.8
+      '@twurple/api-call': 5.2.0
+      '@twurple/common': 5.2.0
       tslib: 2.4.0
     transitivePeerDependencies:
       - encoding
@@ -618,6 +652,14 @@ packages:
 
   /@twurple/common/5.1.8:
     resolution: {integrity: sha512-39i37FIFPATPiuAcKngenoQx0Ake8KW4YpC+OmVhc0YNze+X8G1b/hIqo303ypVwHwB6Dd1I00ewCI7dDZIMEg==}
+    dependencies:
+      '@d-fischer/shared-utils': 3.2.0
+      klona: 2.0.5
+      tslib: 2.4.0
+    dev: false
+
+  /@twurple/common/5.2.0:
+    resolution: {integrity: sha512-9w97ppHJH7L/Uf30haPsOIGKsOdMFM16g0KvGgYRgzvN03AfJJ2VY6K1/OeIXCI3Em8M5Sju3Rh+m1RDoqB1Mw==}
     dependencies:
       '@d-fischer/shared-utils': 3.2.0
       klona: 2.0.5

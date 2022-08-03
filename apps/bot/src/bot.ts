@@ -1,15 +1,21 @@
 import { AuthProvider } from '@twitch-apps/auth'
 import { PrismaClient } from '@twitch-apps/prisma'
+import { ApiClient } from '@twurple/api'
 import { ChatClient } from '@twurple/chat'
+import { Api } from './api.js'
+import { Chat } from './chat.js'
+import { Vips } from './commands/vips.js'
 import { config } from './config.js'
 import { scopes } from './constants/index.js'
-
-import { Vips } from './commands/vips.js'
+import { CoreClient } from './core.js'
+import { parseMessage } from './utils/parse-message.js'
 
 export class Bot {
   private prismaClient: PrismaClient
   private authProvider: AuthProvider
-  public chatClient: ChatClient
+  private chatClient: ChatClient
+  private apiClient: ApiClient
+  private coreClient: CoreClient
 
   constructor() {}
 
@@ -31,17 +37,22 @@ export class Bot {
       }
     })
 
-    this.chatClient = new ChatClient({
-      authProvider: this.authProvider,
-      channels: ['vs_code']
-    })
+    this.apiClient = new Api(this.authProvider)
+    this.chatClient = new Chat(this.authProvider, 'vs_code')
+    this.coreClient = new CoreClient(this.chatClient, this.apiClient)
 
-    const vips = new Vips(this.chatClient)
+    const vips = new Vips(this.coreClient)
 
-    this.chatClient.onMessage(async (channel, user, message, chat) => {
-      if (vips.options.alias === message) {
-        vips.execute(chat, channel)
+    this.chatClient.onMessage((channel, user, message, msg) => {
+      const parsedMessage = parseMessage(message)
+
+      if (parsedMessage) {
+        if (parsedMessage.command === vips.options.name) {
+          vips.execute(msg, parsedMessage.args)
+        }
       }
+
+      console.log(`${user}:`, message)
     })
 
     await this.chatClient.connect()
