@@ -4,6 +4,7 @@ import { ApiClient } from '@twurple/api'
 import { ChatClient } from '@twurple/chat'
 import { Api } from './api.js'
 import { Chat } from './chat.js'
+import { prepareArguments } from './commands/base-command.js'
 import { Vips } from './commands/vips.js'
 import { config } from './config.js'
 import { scopes } from './constants/index.js'
@@ -48,7 +49,9 @@ export class Bot {
 
       if (parsedMessage) {
         if (parsedMessage.command === vips.options.name) {
-          vips.execute(msg, parsedMessage.args)
+          const args = prepareArguments(parsedMessage.args, vips.options.args!)
+          // @ts-ignore
+          vips.execute(msg, args)
         }
       }
 
