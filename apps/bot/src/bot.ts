@@ -4,11 +4,11 @@ import { ApiClient } from '@twurple/api'
 import { ChatClient } from '@twurple/chat'
 import { Api } from './api.js'
 import { Chat } from './chat.js'
-import { prepareArguments } from './commands/base-command.js'
+import { Client } from './client.js'
+import { BaseCommand, prepareArguments } from './commands/base-command.js'
 import { Vips } from './commands/vips.js'
 import { config } from './config.js'
-import { scopes } from './constants/index.js'
-import { CoreClient } from './core.js'
+import { scopes } from './constants.js'
 import { parseMessage } from './utils/parse-message.js'
 
 export class Bot {
@@ -16,7 +16,7 @@ export class Bot {
   private authProvider: AuthProvider
   private chatClient: ChatClient
   private apiClient: ApiClient
-  private coreClient: CoreClient
+  private client: Client
 
   constructor() {}
 
@@ -40,9 +40,9 @@ export class Bot {
 
     this.apiClient = new Api(this.authProvider)
     this.chatClient = new Chat(this.authProvider, 'vs_code')
-    this.coreClient = new CoreClient(this.chatClient, this.apiClient)
+    this.client = new Client(this.chatClient, this.apiClient)
 
-    const vips = new Vips(this.coreClient)
+    const vips: BaseCommand = new Vips(this.client)
 
     this.chatClient.onMessage((channel, user, message, msg) => {
       const parsedMessage = parseMessage(message)
@@ -50,7 +50,6 @@ export class Bot {
       if (parsedMessage) {
         if (parsedMessage.command === vips.options.name) {
           const args = prepareArguments(parsedMessage.args, vips.options.args!)
-          // @ts-ignore
           vips.execute(msg, args)
         }
       }

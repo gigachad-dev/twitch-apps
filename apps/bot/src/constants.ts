@@ -1,3 +1,5 @@
+import { BaseCommand, Vips } from './commands/index.js'
+
 export const scopes = [
   'analytics:read:extensions',
   'user:edit',

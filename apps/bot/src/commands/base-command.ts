@@ -1,7 +1,5 @@
 import type { PrivateMessage } from '@twurple/chat/lib/index.js'
-import { Api } from '../api.js'
-import { Chat } from '../chat.js'
-import { CoreClient } from '../core.js'
+import { Client } from '../client.js'
 
 enum UserLevel {
   everyone = 'everyone',
@@ -42,19 +40,15 @@ export function prepareArguments<T extends Record<string, ArgumentValueType>>(
   }, {} as T)
 }
 
-export abstract class BaseCommand<T> {
-  private api: Api
-  private chat: Chat
-
+export abstract class BaseCommand<T = unknown> extends Client {
   constructor(
-    private readonly client: CoreClient,
+    private readonly client: Client,
     public readonly options: CommandOptions
   ) {
-    this.api = client.api
-    this.chat = client.chat
+    super(client.chat, client.api)
   }
 
-  abstract execute(chat: PrivateMessage, args: T): Promise<void> | void
+  abstract execute(chat: PrivateMessage, ...args: T[]): Promise<void> | void
 
   reply(message: string) {
     this.chat.say(this.chat.currentNick, message)

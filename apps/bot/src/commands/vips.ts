@@ -1,6 +1,7 @@
-import { PrivateMessage } from '@twurple/chat/lib/index.js'
-import { CoreClient } from '../core.js'
-import { ArgumentValueType, BaseCommand } from './base-command.js'
+import type { PrivateMessage } from '@twurple/chat/lib/index.js'
+import type { Client } from '../client.js'
+import { BaseCommand } from './base-command.js'
+import type { ArgumentValueType } from './base-command.js'
 
 interface Args {
   num1: number
@@ -12,8 +13,8 @@ function toNumber(value: ArgumentValueType) {
   return isNaN(num) ? null : num
 }
 
-export class Vips extends BaseCommand<Args> {
-  constructor(client: CoreClient) {
+export class Vips extends BaseCommand {
+  constructor(client: Client) {
     super(client, {
       name: 'test',
       userlevel: 'everyone',
@@ -33,6 +34,6 @@ export class Vips extends BaseCommand<Args> {
   }
 
   execute(chat: PrivateMessage, { num1, num2 }: Args) {
-    this.reply(`${num1}+${num2}=${(num1 + num2).toFixed(2)}`)
+    this.reply(`${num1}+${num2}=${num1 + num2}`)
   }
 }
