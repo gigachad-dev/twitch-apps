@@ -5,10 +5,11 @@ import { ChatClient } from '@twurple/chat'
 import { Api } from './api.js'
 import { Chat } from './chat.js'
 import { Client } from './client.js'
-import { BaseCommand, prepareArguments } from './commands/base-command.js'
-import { Vips } from './commands/vips.js'
+import { BaseCommand } from './commands/base-command.js'
+import { Test } from './commands/test.js'
 import { config } from './config.js'
 import { scopes } from './constants.js'
+import { prepareArguments } from './utils/parse-arguments.js'
 import { parseMessage } from './utils/parse-message.js'
 
 export class Bot {
@@ -42,15 +43,15 @@ export class Bot {
     this.chatClient = new Chat(this.authProvider, 'vs_code')
     this.client = new Client(this.chatClient, this.apiClient)
 
-    const vips: BaseCommand = new Vips(this.client)
+    const test: BaseCommand = new Test(this.client)
 
     this.chatClient.onMessage((channel, user, message, msg) => {
       const parsedMessage = parseMessage(message)
 
       if (parsedMessage) {
-        if (parsedMessage.command === vips.options.name) {
-          const args = prepareArguments(parsedMessage.args, vips.options.args!)
-          vips.execute(msg, args)
+        if (parsedMessage.command === test.options.name) {
+          const args = prepareArguments(parsedMessage.args, test.options.args!)
+          test.run(msg, args)
         }
       }
 

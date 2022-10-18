@@ -6,4 +6,12 @@ export class Client {
     public readonly chat: ChatClient,
     public readonly api: ApiClient
   ) {}
+
+  reply(message: string) {
+    this.chat.say(this.chat.currentNick, message)
+  }
+
+  actionReply(message: string) {
+    this.chat.action(this.chat.currentNick, message)
+  }
 }

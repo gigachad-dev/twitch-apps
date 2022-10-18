@@ -1,19 +1,18 @@
 import type { PrivateMessage } from '@twurple/chat/lib/index.js'
 import type { Client } from '../client.js'
 import { BaseCommand } from './base-command.js'
-import type { ArgumentValueType } from './base-command.js'
 
 interface Args {
   num1: number
   num2: number
 }
 
-function toNumber(value: ArgumentValueType) {
+function toNumber(value: unknown) {
   const num = Number(value)
   return isNaN(num) ? null : num
 }
 
-export class Vips extends BaseCommand {
+export class Test extends BaseCommand {
   constructor(client: Client) {
     super(client, {
       name: 'test',
@@ -33,7 +32,7 @@ export class Vips extends BaseCommand {
     })
   }
 
-  execute(chat: PrivateMessage, { num1, num2 }: Args) {
+  run(chat: PrivateMessage, { num1, num2 }: Args) {
     this.reply(`${num1}+${num2}=${num1 + num2}`)
   }
 }
