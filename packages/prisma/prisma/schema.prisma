@@ -27,11 +27,3 @@ model Connection {
   channelId   Int    @unique
   displayName String @unique
 }
-
-model Message {
-  id Int @id @default(autoincrement())
-
-  userId   String
-  userName String
-  message  String
-}

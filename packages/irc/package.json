@@ -9,5 +9,9 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc"
+  },
+  "dependencies": {
+    "@twitch-apps/auth": "workspace:*",
+    "@twurple/chat": "^5.2.5"
   }
 }

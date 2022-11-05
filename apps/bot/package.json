@@ -7,10 +7,11 @@
   },
   "dependencies": {
     "@twitch-apps/auth": "workspace:^1.0.0",
+    "@twitch-apps/irc": "workspace:^1.0.0",
     "@twitch-apps/prisma": "workspace:^1.0.0",
-    "@twurple/api": "^5.2.0",
-    "@twurple/chat": "^5.1.8",
-    "dotenv": "^16.0.1",
+    "@twurple/api": "^5.2.5",
+    "@twurple/chat": "^5.2.5",
+    "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
     "rotating-file-stream": "^3.0.4"
   }

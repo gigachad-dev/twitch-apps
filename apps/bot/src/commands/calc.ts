@@ -1,5 +1,5 @@
-import type { PrivateMessage } from '@twurple/chat/lib/index.js'
 import type { Client } from '../client.js'
+import type { Message } from '../message.js'
 import { BaseCommand } from '../utils/base-command.js'
 
 interface Args {
@@ -32,7 +32,7 @@ export default class Calc extends BaseCommand {
     })
   }
 
-  run(chat: PrivateMessage, { num1, num2 }: Args) {
-    this.reply(`${num1}+${num2}=${num1 + num2}`)
+  run(msg: Message, { num1, num2 }: Args) {
+    msg.reply(`${num1}+${num2}=${num1 + num2}`)
   }
 }

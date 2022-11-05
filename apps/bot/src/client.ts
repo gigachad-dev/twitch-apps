@@ -1,17 +1,11 @@
+import type { Irc } from '@twitch-apps/irc'
+import type { PrismaClient } from '@twitch-apps/prisma'
 import type { ApiClient } from '@twurple/api/lib'
-import type { ChatClient } from '@twurple/chat'
 
 export class Client {
   constructor(
-    public readonly chat: ChatClient,
-    public readonly api: ApiClient
+    public readonly irc: Irc,
+    public readonly api: ApiClient,
+    public readonly prisma: PrismaClient
   ) {}
-
-  reply(message: string) {
-    this.chat.say(this.chat.currentNick, message)
-  }
-
-  actionReply(message: string) {
-    this.chat.action(this.chat.currentNick, message)
-  }
 }

@@ -1,5 +1,5 @@
-import type { PrivateMessage } from '@twurple/chat/lib/index.js'
 import { Client } from '../client.js'
+import type { Message } from '../message.js'
 import type { CommandArgs } from './parse-arguments.js'
 
 enum UserLevel {
@@ -25,8 +25,8 @@ export abstract class BaseCommand<T = unknown> extends Client {
     private readonly client: Client,
     public readonly options: CommandOptions
   ) {
-    super(client.chat, client.api)
+    super(client.irc, client.api, client.prisma)
   }
 
-  abstract run(chat: PrivateMessage, ...args: T[]): Promise<void> | void
+  abstract run(msg: Message, ...args: T[]): Promise<void> | void
 }

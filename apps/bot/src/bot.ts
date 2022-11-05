@@ -1,10 +1,9 @@
 import { AuthProvider } from '@twitch-apps/auth'
+import { Irc } from '@twitch-apps/irc'
 import { PrismaClient } from '@twitch-apps/prisma'
 import { ApiClient } from '@twurple/api'
-import { ChatClient } from '@twurple/chat'
 import { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
 import { Api } from './api.js'
-import { Chat } from './chat.js'
 import { Client } from './client.js'
 import { Commands } from './commands.js'
 import { config } from './config.js'
@@ -14,10 +13,10 @@ import { parseMessage } from './utils/parse-message.js'
 export class Bot {
   private prismaClient: PrismaClient
   private authProvider: AuthProvider
-  private chatClient: ChatClient
+  private ircClient: Irc
   private apiClient: ApiClient
-  private client: Client
   private commands: Commands
+  private client: Client
 
   constructor() {}
 
@@ -39,15 +38,24 @@ export class Bot {
       }
     })
 
+    const connections = await this.prismaClient.connection.findMany()
+
     this.apiClient = new Api(this.authProvider)
-    this.chatClient = new Chat(this.authProvider, ['vs_code'])
-    this.client = new Client(this.chatClient, this.apiClient)
+    const { displayName } = await this.apiClient.users.getMe()
+    this.ircClient = new Irc(this.authProvider, [
+      displayName,
+      ...connections.map((connection) => connection.displayName)
+    ])
+
+    this.client = new Client(this.ircClient, this.apiClient, this.prismaClient)
     this.commands = new Commands(this.client)
 
-    this.chatClient.onMessage(this.onMessage.bind(this))
+    this.ircClient.onMessage(this.onMessage.bind(this))
+    this.ircClient.onJoin(this.onJoin.bind(this))
+    this.ircClient.onPart(this.onPart.bind(this))
 
     await this.commands.registerCommands()
-    await this.chatClient.connect()
+    await this.ircClient.connect()
   }
 
   private onMessage(
@@ -58,9 +66,17 @@ export class Bot {
   ): void {
     const parsedMessage = parseMessage(message)
     if (parsedMessage) {
-      this.commands.runCommand(parsedMessage, msg)
+      this.commands.runCommand(parsedMessage, channel, msg)
     }
 
     console.log(`${user}:`, message)
+  }
+
+  private onJoin(channel: string, user: string): void {
+    console.log('onJoin:', { channel, user })
+  }
+
+  private onPart(channel: string, user: string): void {
+    console.log('onPart:', { channel, user })
   }
 }
