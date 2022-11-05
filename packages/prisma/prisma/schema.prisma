@@ -21,6 +21,13 @@ model Auth {
   obtainmentTimestamp Int
 }
 
+model Connection {
+  id Int @id @default(autoincrement())
+
+  channelId   Int    @unique
+  displayName String @unique
+}
+
 model Message {
   id Int @id @default(autoincrement())
 

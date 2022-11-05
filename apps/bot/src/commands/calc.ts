@@ -1,6 +1,6 @@
 import type { PrivateMessage } from '@twurple/chat/lib/index.js'
 import type { Client } from '../client.js'
-import { BaseCommand } from './base-command.js'
+import { BaseCommand } from '../utils/base-command.js'
 
 interface Args {
   num1: number
@@ -9,13 +9,13 @@ interface Args {
 
 function toNumber(value: unknown) {
   const num = Number(value)
-  return isNaN(num) ? null : num
+  return !isFinite(num) || isNaN(num) ? null : num
 }
 
-export class Test extends BaseCommand {
+export default class Calc extends BaseCommand {
   constructor(client: Client) {
     super(client, {
-      name: 'test',
+      name: 'calc',
       userlevel: 'everyone',
       args: [
         {

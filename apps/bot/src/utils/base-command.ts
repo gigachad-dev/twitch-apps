@@ -1,6 +1,6 @@
 import type { PrivateMessage } from '@twurple/chat/lib/index.js'
 import { Client } from '../client.js'
-import type { CommandArgs } from '../utils/parse-arguments.js'
+import type { CommandArgs } from './parse-arguments.js'
 
 enum UserLevel {
   everyone = 'everyone',

@@ -1,4 +1,5 @@
-import { BaseCommand, Vips } from './commands/index.js'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export const scopes = [
   'analytics:read:extensions',
@@ -53,3 +54,7 @@ export const scopes = [
   'channel:manage:vips',
   'user:manage:whispers'
 ]
+
+export const commandsPath = (command: string = ''): string => {
+  return resolve(dirname(fileURLToPath(import.meta.url)), 'commands', command)
+}

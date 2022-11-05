@@ -8,12 +8,13 @@
   },
   "scripts": {
     "build": "prisma generate && tsc",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^4.1.1"
+    "@prisma/client": "^4.5.0"
   },
   "devDependencies": {
-    "prisma": "^4.1.1"
+    "prisma": "^4.5.0"
   }
 }
