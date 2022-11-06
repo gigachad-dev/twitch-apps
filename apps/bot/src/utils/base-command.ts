@@ -14,6 +14,9 @@ enum UserLevel {
 type UserLevels = keyof typeof UserLevel
 
 interface CommandOptions {
+  private?: boolean
+  description?: string
+  examples?: string[]
   name: string
   userlevel: UserLevels
   aliases?: string[]

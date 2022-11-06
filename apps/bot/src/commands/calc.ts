@@ -15,6 +15,7 @@ function toNumber(value: unknown) {
 export default class Calc extends BaseCommand {
   constructor(client: Client) {
     super(client, {
+      private: true,
       name: 'calc',
       userlevel: 'everyone',
       args: [

@@ -1,4 +1,5 @@
 import type { HelixUser } from '@twurple/api/lib/index.js'
+import { triggerAsyncId } from 'async_hooks'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
 import { BaseCommand } from '../utils/base-command.js'
@@ -11,6 +12,7 @@ interface Args {
 export default class Irc extends BaseCommand {
   constructor(client: Client) {
     super(client, {
+      private: true,
       name: 'irc',
       userlevel: 'everyone',
       args: [
@@ -22,7 +24,11 @@ export default class Irc extends BaseCommand {
           }
         },
         {
-          name: 'username'
+          name: 'username',
+          defaultValue: null,
+          transform(value) {
+            return value
+          },
         }
       ]
     })

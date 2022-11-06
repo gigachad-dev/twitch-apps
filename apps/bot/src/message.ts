@@ -33,7 +33,9 @@ export class Message {
   }
 
   reply(message: string) {
-    this.client.irc.say(this.currentChannel, message, { replyTo: this.messageId })
+    this.client.irc.say(this.currentChannel, message, {
+      replyTo: this.messageId
+    })
   }
 
   action(message: string) {

@@ -9,7 +9,8 @@
   "scripts": {
     "build": "prisma generate && tsc",
     "migrate": "prisma migrate dev",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "prepare": "pnpm build"
   },
   "dependencies": {
     "@prisma/client": "^4.5.0"

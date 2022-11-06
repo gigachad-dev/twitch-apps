@@ -27,3 +27,11 @@ model Connection {
   channelId   Int    @unique
   displayName String @unique
 }
+
+model TextToSpeech {
+  id Int @id @default(autoincrement())
+
+  volume Float
+  speed  Float
+  voice  String
+}

@@ -18,6 +18,7 @@ export class Commands {
       const { default: Command } = await import(commandsPath(path))
       if (Command.prototype instanceof BaseCommand) {
         const cmd: BaseCommand = new Command(this.client)
+        console.log(`[commands]: ${cmd.options.name}`)
         this.commands.push(cmd)
       }
     }
@@ -35,7 +36,10 @@ export class Commands {
     const command = this.getCommand(parsedMessage.command)
     if (command) {
       const message = new Message(this.client, msg, channel)
-      const args = prepareArguments(parsedMessage.args, command.options.args!)
+      const args = command.options.args
+        ? prepareArguments(parsedMessage.args, command.options.args!)
+        : parsedMessage.args
+
       command.run(message, args)
     }
   }
