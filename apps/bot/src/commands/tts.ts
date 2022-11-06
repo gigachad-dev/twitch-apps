@@ -37,7 +37,8 @@ export default class TextToSpeech extends BaseCommand {
 
   constructor(client: Client) {
     super(client, {
-      name: 't',
+      // !FIXME
+      name: 'tts2',
       description: 'Text to Speech',
       userlevel: 'everyone',
       aliases: ['ттс'],

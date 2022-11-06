@@ -14,7 +14,8 @@ export interface CatApiResponse {
 export default class Cat extends BaseCommand {
   constructor(client: Client) {
     super(client, {
-      name: 'cat',
+      // !FIXME
+      name: 'cat2',
       userlevel: 'everyone',
       description: 'Случайная картинка котейки',
       aliases: ['кот']
