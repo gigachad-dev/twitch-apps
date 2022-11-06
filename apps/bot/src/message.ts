@@ -12,6 +12,10 @@ export class Message {
     return this.name === this.client.irc.currentNick
   }
 
+  get userInfo() {
+    return this.msg.userInfo
+  }
+
   get name(): string {
     return this.displayName.toLowerCase()
   }
@@ -24,11 +28,15 @@ export class Message {
     return this.channel
   }
 
-  reply(message: string) {
-    this.client.irc.say(this.currentChannel, message)
+  get messageId(): string {
+    return this.msg.id
   }
 
-  actionReply(message: string) {
+  reply(message: string) {
+    this.client.irc.say(this.currentChannel, message, { replyTo: this.messageId })
+  }
+
+  action(message: string) {
     this.client.irc.action(this.currentChannel, message)
   }
 }
