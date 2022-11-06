@@ -35,7 +35,7 @@ export default class Irc extends BaseCommand {
   }
 
   async run(msg: Message, { action, username }: Args) {
-    if (msg.isBotOwner) {
+    if (msg.isBotOwner && username) {
       const usernameInfo = await this.getUsernameInfo(username)
       if (!usernameInfo) return
 
