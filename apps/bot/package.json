@@ -13,6 +13,7 @@
     "@twurple/chat": "^5.2.5",
     "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
+    "got": "^12.5.2",
     "rotating-file-stream": "^3.0.4"
   }
 }

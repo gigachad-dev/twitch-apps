@@ -57,6 +57,7 @@ export default class TextToSpeech extends BaseCommand {
   }
 
   async run(msg: Message, args: string[]): Promise<void> {
+    if (!msg.isBotOwner) return
     if (args.length > 0) {
       if (msg.isBotOwner) {
         this.runManage(msg, args)
