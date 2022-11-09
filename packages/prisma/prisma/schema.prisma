@@ -33,7 +33,7 @@ model TextToSpeech {
 
   volume Float
   speed  Float
-  voice  String
+  voice  String?
 }
 
 model Balaboba {

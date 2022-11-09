@@ -1,3 +1,5 @@
+// sudo dns install sox
+// docker pull ghcr.io/rprtr258/tts:latest
 import { exec } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { type } from 'node:os'
@@ -8,17 +10,8 @@ import { BaseCommand } from '../utils/base-command.js'
 
 const UNIX_OPTIONS = {
   volume: 0.2,
-  speed: 1.3,
-  voice: 'random'
+  speed: 1.3
 }
-
-const UNIX_VOICES = [
-  'kseniya',
-  'xenia',
-  'aidar',
-  'baya',
-  'eugene'
-]
 
 const INITIAL_OPTIONS: Record<string, Prisma.TextToSpeechCreateInput> = {
   Linux: UNIX_OPTIONS,
@@ -152,23 +145,7 @@ export default class TextToSpeech extends BaseCommand {
   async speech(args: string[]) {
     const options = await this.getOptions()
     if (!options) return
-    const { message, voice } = (() => {
-      let voice = this.isUnix ? 'random' : options.voice
-      let message = args.join(' ')
 
-      if (this.isUnix) {
-        if (UNIX_VOICES.includes(args[0]!)) {
-          voice = args.shift()!
-        }
-
-        message = message.replace(/[^а-яА-Я ]/g, '')
-      }
-
-      return {
-        message,
-        voice
-      }
-    })()
 
     if (this.playing) {
       this.queue.push(args)
@@ -176,7 +153,14 @@ export default class TextToSpeech extends BaseCommand {
     }
 
     this.playing = true
-    const cmd = `docker run --rm -v /home/crashmax:/out tts ${voice} "${message}" tts.wav`
+    const message = args.join(' ')
+    let cmd
+
+    if (options.voice) {
+      cmd = ``
+    } else {
+      cmd = `docker run --rm -v ~/:/out ghcr.io/rprtr258/tts "${message}" tts.mp3`
+    }
 
     exec(cmd, (err) => {
       if (err) {
@@ -192,7 +176,7 @@ export default class TextToSpeech extends BaseCommand {
   async play() {
     const options = await this.getOptions()
     if (!options) return
-    const cmd = `play -v ${options.volume} ~/tts.wav tempo ${options.speed}`
+    const cmd = `play -v ${options.volume} ~/tts.mp3 tempo ${options.speed}`
 
     const nextTts = () => {
       this.playing = false
@@ -235,8 +219,7 @@ export default class TextToSpeech extends BaseCommand {
     })
   }
 
-  get isUnix() {
-    const os = type()
-    return os === 'Linux' || os === 'Darwin'
+  get isWindows() {
+    return type() === 'Windows_NT'
   }
 }
