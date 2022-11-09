@@ -1,8 +1,8 @@
 // sudo dns install sox
 // docker pull ghcr.io/rprtr258/tts:latest
-import { exec } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
-import { type } from 'node:os'
+import { homedir, type } from 'node:os'
 import type { Prisma } from '@twitch-apps/prisma'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
@@ -26,7 +26,7 @@ const INITIAL_OPTIONS: Record<string, Prisma.TextToSpeechCreateInput> = {
 export default class TextToSpeech extends BaseCommand {
   private playing = false
   private queue: string[][] = []
-  private soundQueue: ChildProcess[] = []
+  private playersQueue: ChildProcess[] = []
 
   constructor(client: Client) {
     super(client, {
@@ -35,9 +35,9 @@ export default class TextToSpeech extends BaseCommand {
       userlevel: 'everyone',
       aliases: ['ттс'],
       examples: [
-        'tts speed <number>',
-        'tts volume <number>',
-        'tts voices'
+        '!tts speed <number>',
+        '!tts volume <number>',
+        '!tts voices'
       ]
     })
 
@@ -54,7 +54,10 @@ export default class TextToSpeech extends BaseCommand {
   }
 
   async run(msg: Message, args: string[]): Promise<void> {
-    if (!msg.isBotOwner) return
+    if (args.length === 0) {
+      return this.replyHelp(msg)
+    }
+
     if (args.length > 0) {
       if (msg.userInfo.isBroadcaster) {
         this.runManage(msg, args)
@@ -77,11 +80,15 @@ export default class TextToSpeech extends BaseCommand {
     }
   }
 
+  replyHelp(msg: Message): void {
+    msg.reply(`[TTS] Команды: ${this.options.examples!.join(', ')}`)
+  }
+
   async runManage(msg: Message, args: string[]) {
     switch (args[0]) {
       case 'skip': {
-        if (!this.soundQueue.length) return
-        const proc = this.soundQueue.shift()
+        if (!this.playersQueue.length) return
+        const proc = this.playersQueue.shift()
         if (!proc) return
         proc.kill()
         break
@@ -146,37 +153,41 @@ export default class TextToSpeech extends BaseCommand {
     const options = await this.getOptions()
     if (!options) return
 
-
     if (this.playing) {
       this.queue.push(args)
       return
     }
 
     this.playing = true
+
     const message = args.join(' ')
-    let cmd
+    const docker = spawn('docker', [
+      'run',
+      '--rm',
+      '-v',
+      `${homedir()}:/out`,
+      'ghcr.io/rprtr258/tts',
+      message,
+      'tts.mp3'
+    ])
 
-    if (options.voice) {
-      cmd = ``
-    } else {
-      cmd = `docker run --rm -v ~/:/out ghcr.io/rprtr258/tts "${message}" tts.mp3`
-    }
-
-    exec(cmd, (err) => {
+    docker.stderr.on('data', (err) => {
       if (err) {
         console.log(`[${this.constructor.name}] ${err}`)
         this.playing = false
-        return
       }
+    })
 
-      this.play()
+    docker.on('close', (code) => {
+      if (code === 0) {
+        this.play()
+      }
     })
   }
 
   async play() {
     const options = await this.getOptions()
     if (!options) return
-    const cmd = `play -v ${options.volume} ~/tts.mp3 tempo ${options.speed}`
 
     const nextTts = () => {
       this.playing = false
@@ -187,22 +198,26 @@ export default class TextToSpeech extends BaseCommand {
         this.speech(nextQueue)
       }
 
-      this.soundQueue.shift()
+      this.playersQueue.shift()
     }
 
-    const proc = exec(cmd, (err) => {
-      if (err) {
-        console.log(`[TTS] ${err.message}`)
-      }
+    const player = spawn('play', [
+      '-v',
+      `${options.volume}`,
+      `${homedir()}/tts.mp3`,
+      'tempo',
+      `${options.speed}`
+    ])
 
+    player.stderr.on('data', (err) => {
+      console.log(`[TTS] ${err}`)
+    })
+
+    player.on('close', () => {
       nextTts()
     })
 
-    proc.on('close', () => {
-      nextTts()
-    })
-
-    this.soundQueue.push(proc)
+    this.playersQueue.push(player)
   }
 
   async getOptions() {

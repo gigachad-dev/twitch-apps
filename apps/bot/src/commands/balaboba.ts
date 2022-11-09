@@ -41,10 +41,10 @@ export default class Balaboba extends BaseCommand {
       name: 'balaboba',
       userlevel: 'everyone',
       examples: [
-        'balaboba <query>',
-        'balaboba <style> <query>',
-        'balaboba styles',
-        'balaboba tts'
+        '!balaboba <query>',
+        '!balaboba <style> <query>',
+        '!balaboba styles',
+        '!balaboba tts'
       ]
     })
 
@@ -60,7 +60,9 @@ export default class Balaboba extends BaseCommand {
   }
 
   async run(msg: Message, args: string[]) {
-    if (args.length === 0) return
+    if (args.length === 0) {
+      return this.replyHelp(msg)
+    }
 
     if (args[0] === 'styles') {
       return this.replyStyles(msg)
@@ -113,6 +115,10 @@ export default class Balaboba extends BaseCommand {
     } catch (err) {
       msg.reply((err as Error).message)
     }
+  }
+
+  replyHelp(msg: Message) {
+    msg.reply(`[Balaboba] Команды: ${this.options.examples!.join(', ')}`)
   }
 
   replyStyles(msg: Message): void {
