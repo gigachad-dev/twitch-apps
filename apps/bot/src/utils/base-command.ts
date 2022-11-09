@@ -31,5 +31,6 @@ export abstract class BaseCommand<T = unknown> extends Client {
     super(client.irc, client.api, client.prisma)
   }
 
-  abstract run(msg: Message, ...args: T[]): Promise<void> | void
+  abstract run(msg: Message, ...args: T[]): any
+  abstract exec(...args: T[]): any
 }

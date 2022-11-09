@@ -18,7 +18,7 @@ model Auth {
   refreshToken        String?
   scope               String[]
   expiresIn           Int?
-  obtainmentTimestamp Int
+  obtainmentTimestamp DateTime
 }
 
 model Connection {
@@ -34,4 +34,10 @@ model TextToSpeech {
   volume Float
   speed  Float
   voice  String
+}
+
+model Balaboba {
+  id Int @id @default(autoincrement())
+
+  tts Boolean @default(false)
 }

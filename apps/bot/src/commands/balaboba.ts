@@ -1,3 +1,4 @@
+import { Prisma } from '@twitch-apps/prisma'
 import got from 'got'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
@@ -42,9 +43,20 @@ export default class Balaboba extends BaseCommand {
       examples: [
         'balaboba <query>',
         'balaboba <style> <query>',
-        'balaboba styles'
+        'balaboba styles',
+        'balaboba tts'
       ]
     })
+
+    this.getOptions().then((value) => {
+      if (!value) {
+        this.updateOptions({})
+      }
+    })
+  }
+
+  exec(...args: unknown[]): void {
+    throw new Error('Method not implemented.')
   }
 
   async run(msg: Message, args: string[]) {
@@ -52,6 +64,10 @@ export default class Balaboba extends BaseCommand {
 
     if (args[0] === 'styles') {
       return this.replyStyles(msg)
+    }
+
+    if (args[0] === 'tts') {
+      return this.toggleTextToSpeech(msg)
     }
 
     try {
@@ -84,7 +100,16 @@ export default class Balaboba extends BaseCommand {
         throw new Error('Балабоба не принимает запросы xdd')
       }
 
-      msg.reply(`-> ${res.text}`)
+      const options = await this.getOptions()
+      if (!options) return
+
+      const message = `${intro === 8 ? query : ''} ${res.text}`
+
+      if (options.tts) {
+        msg.commands.execCommand('tts', message)
+      } else {
+        msg.reply(message)
+      }
     } catch (err) {
       msg.reply((err as Error).message)
     }
@@ -95,6 +120,34 @@ export default class Balaboba extends BaseCommand {
       .map(([styleId, description]) => `${styleId} — ${description}`)
       .join(', ')
 
-    msg.reply(`Стили БАЛАБОБЫ: ${styles}`)
+    msg.reply(`[Balaboba] Стили: ${styles}`)
+  }
+
+  async toggleTextToSpeech(msg: Message) {
+    const options = await this.getOptions()
+    if (!options) return
+
+    const toggledTts = !options.tts
+    await this.updateOptions({
+      tts: toggledTts
+    })
+
+    msg.reply(
+      `[Balaboba] Text to Speech ${toggledTts ? 'включен' : 'выключен'}`
+    )
+  }
+
+  async updateOptions(options: Prisma.BalabobaCreateInput) {
+    await this.prisma.balaboba.upsert({
+      where: { id: 1 },
+      create: options,
+      update: options
+    })
+  }
+
+  async getOptions() {
+    return await this.prisma.balaboba.findFirst({
+      where: { id: 1 }
+    })
   }
 }

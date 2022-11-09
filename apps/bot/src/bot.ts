@@ -8,7 +8,6 @@ import { Client } from './client.js'
 import { Commands } from './commands.js'
 import { config } from './config.js'
 import { scopes } from './constants.js'
-import { parseMessage } from './utils/parse-message.js'
 
 export class Bot {
   private prismaClient: PrismaClient
@@ -29,13 +28,18 @@ export class Bot {
       prismaClient: this.prismaClient,
       clientId: config.CLIENT_ID,
       clientSecret: config.CLIENT_SECRET,
-      initialToken: tokens ?? {
-        accessToken: config.ACCESS_TOKEN,
-        refreshToken: config.REFRESH_TOKEN,
-        expiresIn: 1,
-        obtainmentTimestamp: 0,
-        scope: scopes
-      }
+      initialToken: tokens
+        ? {
+            ...tokens,
+            obtainmentTimestamp: tokens.obtainmentTimestamp.getTime()
+          }
+        : {
+            accessToken: config.ACCESS_TOKEN,
+            refreshToken: config.REFRESH_TOKEN,
+            expiresIn: 1,
+            obtainmentTimestamp: 0,
+            scope: scopes
+          }
     })
 
     const connections = await this.prismaClient.connection.findMany()
@@ -64,7 +68,7 @@ export class Bot {
     message: string,
     msg: TwitchPrivateMessage
   ): void {
-    const parsedMessage = parseMessage(message)
+    const parsedMessage = this.commands.parseMessage(message)
     if (parsedMessage) {
       this.commands.runCommand(parsedMessage, channel, msg)
     }

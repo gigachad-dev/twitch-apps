@@ -37,9 +37,14 @@ export class AuthProvider extends RefreshingAuthProvider {
   }
 
   private async onRefresh(token: AccessToken): Promise<void> {
+    const query = {
+      ...token,
+      obtainmentTimestamp: new Date(token.obtainmentTimestamp)
+    }
+
     await this.prisma.auth.upsert({
-      create: token,
-      update: token,
+      create: query,
+      update: query,
       where: { id: 1 }
     })
   }

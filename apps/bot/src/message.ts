@@ -1,8 +1,10 @@
 import type { PrivateMessage } from '@twurple/chat/lib'
 import type { Client } from './client.js'
+import type { Commands } from './commands.js'
 
 export class Message {
   constructor(
+    public readonly commands: Commands,
     private readonly client: Client,
     private readonly msg: PrivateMessage,
     private readonly channel: string
@@ -30,6 +32,10 @@ export class Message {
 
   get messageId(): string {
     return this.msg.id
+  }
+
+  say(message: string) {
+    this.client.irc.say(this.currentChannel, message)
   }
 
   reply(message: string) {

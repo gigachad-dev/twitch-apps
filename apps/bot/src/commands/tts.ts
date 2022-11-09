@@ -37,14 +37,13 @@ export default class TextToSpeech extends BaseCommand {
 
   constructor(client: Client) {
     super(client, {
-      // !FIXME
-      name: 'tts2',
+      name: 'tts',
       description: 'Text to Speech',
       userlevel: 'everyone',
       aliases: ['ттс'],
       examples: [
-        'tts tempo <temp>',
-        'tts volume <volume>',
+        'tts speed <number>',
+        'tts volume <number>',
         'tts voices'
       ]
     })
@@ -57,10 +56,14 @@ export default class TextToSpeech extends BaseCommand {
     })
   }
 
+  exec(args: string): void {
+    this.speech([args])
+  }
+
   async run(msg: Message, args: string[]): Promise<void> {
     if (!msg.isBotOwner) return
     if (args.length > 0) {
-      if (msg.isBotOwner) {
+      if (msg.userInfo.isBroadcaster) {
         this.runManage(msg, args)
       } else if (
         msg.userInfo.isVip ||
