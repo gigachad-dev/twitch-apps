@@ -1,8 +1,8 @@
 import { Prisma } from '@twitch-apps/prisma'
 import got from 'got'
 import type { Client } from '../client.js'
+import { BaseCommand } from '../commands.js'
 import type { Message } from '../message.js'
-import { BaseCommand } from '../utils/base-command.js'
 
 interface BalabobaResponse {
   bad_query: number

@@ -5,8 +5,8 @@ import type { ChildProcess } from 'node:child_process'
 import { homedir, type } from 'node:os'
 import type { Prisma } from '@twitch-apps/prisma'
 import type { Client } from '../client.js'
+import { BaseCommand } from '../commands.js'
 import type { Message } from '../message.js'
-import { BaseCommand } from '../utils/base-command.js'
 
 const UNIX_OPTIONS = {
   volume: 0.2,

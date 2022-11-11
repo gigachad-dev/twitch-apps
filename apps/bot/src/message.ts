@@ -10,20 +10,8 @@ export class Message {
     private readonly channel: string
   ) {}
 
-  get isBotOwner(): boolean {
-    return this.name === this.client.irc.currentNick
-  }
-
   get userInfo() {
     return this.msg.userInfo
-  }
-
-  get name(): string {
-    return this.displayName.toLowerCase()
-  }
-
-  get displayName(): string {
-    return this.msg.tags.get('display-name')!
   }
 
   get currentChannel(): string {

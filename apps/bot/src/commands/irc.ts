@@ -1,7 +1,7 @@
 import type { HelixUser } from '@twurple/api/lib/index.js'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
-import { BaseCommand } from '../utils/base-command.js'
+import { BaseCommand } from '../commands.js'
 
 interface Args {
   action: 'join' | 'part'

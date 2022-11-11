@@ -1,6 +1,6 @@
 import type { Client } from '../client.js'
+import { BaseCommand } from '../commands.js'
 import type { Message } from '../message.js'
-import { BaseCommand } from '../utils/base-command.js'
 
 interface Args {
   num1: number

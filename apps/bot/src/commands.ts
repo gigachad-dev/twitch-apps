@@ -1,17 +1,24 @@
 import { readdir } from 'node:fs/promises'
 import type { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
-import type { Client } from './client.js'
+import { Client } from './client.js'
 import { commandsPath } from './constants.js'
 import { Message } from './message.js'
-import { BaseCommand } from './utils/base-command.js'
-import { prepareArguments } from './utils/parse-arguments.js'
 
 export interface ParsedMessage {
   command: string
   args: string[]
 }
 
+export type ArgumentValueType = string | number | boolean | null
+
+export interface CommandArgs {
+  name: string
+  defaultValue?: ArgumentValueType
+  transform: (value: ArgumentValueType) => ArgumentValueType
+}
+
 export class Commands {
+  public readonly prefix = '!'
   private readonly commands: BaseCommand[] = []
 
   constructor(private readonly client: Client) {}
@@ -32,8 +39,21 @@ export class Commands {
     return this.commands.find((command) => command.options.name === commandName)
   }
 
+  private parseArguments<T extends Record<string, ArgumentValueType>>(
+    args: string[],
+    argsMap: CommandArgs[]
+  ): T {
+    return argsMap.reduce((acc, arg, key) => {
+      const argValue = (args[key] ?? arg.defaultValue)!
+      const transformedValue = arg.transform(argValue)
+      // @ts-ignore
+      acc[arg.name] = transformedValue ?? arg.defaultValue
+      return acc
+    }, {} as T)
+  }
+
   parseMessage(message: string): ParsedMessage | null {
-    const regex = new RegExp('^(!)([^\\s]+) ?(.*)', 'gims')
+    const regex = new RegExp(`^(${this.prefix})([^\\s]+) ?(.*)`, 'gims')
     const matches = regex.exec(message)
 
     if (matches) {
@@ -59,9 +79,7 @@ export class Commands {
   }
 
   execCommand(commandName: string, ...args: any[]): void {
-    const command = this.commands.find(
-      (command) => command.options.name === commandName
-    )
+    const command = this.getCommand(commandName)
 
     if (command) {
       command.exec(...args)
@@ -74,13 +92,49 @@ export class Commands {
     msg: TwitchPrivateMessage
   ): void {
     const command = this.getCommand(parsedMessage.command)
+
     if (command) {
       const message = new Message(this, this.client, msg, channel)
       const args = command.options.args
-        ? prepareArguments(parsedMessage.args, command.options.args!)
+        ? this.parseArguments(parsedMessage.args, command.options.args)
         : parsedMessage.args
 
       command.run(message, args)
     }
   }
+}
+
+/** BaseCommand */
+
+enum UserLevel {
+  everyone = 'everyone',
+  subscriber = 'subscriber',
+  moderator = 'moderator',
+  vip = 'vip',
+  regular = 'regular',
+  streamer = 'streamer'
+}
+
+type UserLevels = keyof typeof UserLevel
+
+interface CommandOptions {
+  private?: boolean
+  description?: string
+  examples?: string[]
+  name: string
+  userlevel: UserLevels
+  aliases?: string[]
+  args?: CommandArgs[]
+}
+
+export abstract class BaseCommand<T = unknown> extends Client {
+  constructor(
+    private readonly client: Client,
+    public readonly options: CommandOptions
+  ) {
+    super(client.irc, client.api, client.prisma)
+  }
+
+  abstract run(msg: Message, ...args: T[]): any
+  abstract exec(...args: T[]): any
 }

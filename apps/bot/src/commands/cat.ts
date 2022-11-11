@@ -1,8 +1,8 @@
 import got from 'got'
 import { Client } from '../client.js'
+import { BaseCommand } from '../commands.js'
+import { randomInt } from '../helpers/random-int.js'
 import { Message } from '../message.js'
-import { BaseCommand } from '../utils/base-command.js'
-import { randomInt } from '../utils/random-int.js'
 
 export interface CatApiResponse {
   id: string
