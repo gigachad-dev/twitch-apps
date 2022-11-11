@@ -14,12 +14,15 @@ export interface CatApiResponse {
 export default class Cat extends BaseCommand {
   constructor(client: Client) {
     super(client, {
-      // !FIXME
-      name: 'cat2',
+      name: 'cat',
       userlevel: 'everyone',
       description: 'Случайная картинка котейки',
       aliases: ['кот']
     })
+  }
+
+  exec(...args: unknown[]) {
+    throw new Error('Method not implemented.')
   }
 
   async run(msg: Message): Promise<void> {

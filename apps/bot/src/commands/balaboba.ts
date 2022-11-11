@@ -55,7 +55,7 @@ export default class Balaboba extends BaseCommand {
     })
   }
 
-  exec(...args: unknown[]): void {
+  exec(...args: unknown[]) {
     throw new Error('Method not implemented.')
   }
 

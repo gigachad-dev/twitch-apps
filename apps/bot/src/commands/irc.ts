@@ -1,5 +1,4 @@
 import type { HelixUser } from '@twurple/api/lib/index.js'
-import { triggerAsyncId } from 'async_hooks'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
 import { BaseCommand } from '../utils/base-command.js'
@@ -28,14 +27,18 @@ export default class Irc extends BaseCommand {
           defaultValue: null,
           transform(value) {
             return value
-          },
+          }
         }
       ]
     })
   }
 
+  exec(...args: unknown[]) {
+    throw new Error('Method not implemented.')
+  }
+
   async run(msg: Message, { action, username }: Args) {
-    if (msg.isBotOwner && username) {
+    if (msg.userInfo.isBroadcaster && username) {
       const usernameInfo = await this.getUsernameInfo(username)
       if (!usernameInfo) return
 
@@ -70,7 +73,9 @@ export default class Irc extends BaseCommand {
       })
 
       await this.irc.join(displayName)
-    } catch (err) { }
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   async part({ displayName, id }: HelixUser): Promise<void> {
@@ -82,6 +87,8 @@ export default class Irc extends BaseCommand {
       })
 
       this.irc.part(displayName)
-    } catch (err) { }
+    } catch (err) {
+      console.log(err)
+    }
   }
 }

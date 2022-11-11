@@ -33,6 +33,10 @@ export default class Calc extends BaseCommand {
     })
   }
 
+  exec(...args: unknown[]) {
+    throw new Error('Method not implemented.')
+  }
+
   run(msg: Message, { num1, num2 }: Args) {
     msg.reply(`${num1}+${num2}=${num1 + num2}`)
   }
