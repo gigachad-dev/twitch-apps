@@ -1,0 +1,8 @@
+[submodule "sandbox/silero-tts"]
+	path = sandbox/silero-tts
+	url = https://github.com/gigachad-dev/silero-tts
+	branch = main
+[submodule "sandbox/google-tts"]
+	path = sandbox/google-tts
+	url = https://github.com/gigachad-dev/google-tts
+	branch = main
