@@ -11,13 +11,12 @@ interface Args {
 export default class Irc extends BaseCommand {
   constructor(client: Client) {
     super(client, {
-      private: true,
       name: 'irc',
-      userlevel: 'everyone',
+      userlevel: ['everyone'],
       args: [
         {
           name: 'action',
-          defaultValue: 'join',
+          defaultValue: null,
           transform(value) {
             return value === 'join' || value === 'part' ? value : null
           }
@@ -39,7 +38,8 @@ export default class Irc extends BaseCommand {
 
   async run(msg: Message, { action, username }: Args) {
     if (msg.userInfo.isBroadcaster && username) {
-      const usernameInfo = await this.getUsernameInfo(username)
+      const channelName = username.startsWith('@') ? username.slice(1) : username
+      const usernameInfo = await this.getUsernameInfo(channelName)
       if (!usernameInfo) return
 
       switch (action) {
@@ -58,18 +58,9 @@ export default class Irc extends BaseCommand {
 
   private async join({ displayName, id }: HelixUser): Promise<void> {
     try {
-      const channelId = Number(id)
-      await this.prisma.connection.upsert({
-        where: {
-          channelId
-        },
-        update: {
-          displayName
-        },
-        create: {
-          channelId,
-          displayName
-        }
+      await this.updateChannel({
+        displayName,
+        id
       })
 
       await this.irc.join(displayName)
@@ -79,14 +70,33 @@ export default class Irc extends BaseCommand {
   }
 
   async part({ displayName, id }: HelixUser): Promise<void> {
+    await this.updateChannel({
+      connected: false,
+      displayName,
+      id
+    })
+
+    this.irc.part(displayName)
+  }
+
+  async updateChannel(
+    { displayName, connected, id }: { displayName: string, id: string, connected?: boolean }
+  ): Promise<void> {
     try {
-      await this.prisma.connection.delete({
+      const channelId = Number(id)
+      await this.prisma.channel.upsert({
         where: {
-          channelId: Number(id)
+          channelId
+        },
+        update: {
+          connected,
+          displayName
+        },
+        create: {
+          channelId,
+          displayName
         }
       })
-
-      this.irc.part(displayName)
     } catch (err) {
       console.log(err)
     }

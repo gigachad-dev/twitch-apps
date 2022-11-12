@@ -39,7 +39,7 @@ export default class Balaboba extends BaseCommand {
   constructor(client: Client) {
     super(client, {
       name: 'balaboba',
-      userlevel: 'everyone',
+      userlevel: ['everyone'],
       examples: [
         '!balaboba <query>',
         '!balaboba <style> <query>',

@@ -42,13 +42,20 @@ export class Bot {
           }
     })
 
-    const connections = await this.prismaClient.connection.findMany()
+    const channels = await this.prismaClient.channel.findMany({
+      where: {
+        connected: true
+      },
+      select: {
+        displayName: true
+      }
+    })
 
     this.apiClient = new Api(this.authProvider)
     const { displayName } = await this.apiClient.users.getMe()
     this.ircClient = new Irc(this.authProvider, [
       displayName,
-      ...connections.map((connection) => connection.displayName)
+      ...channels.map((channel) => channel.displayName)
     ])
 
     this.client = new Client(this.ircClient, this.apiClient, this.prismaClient)

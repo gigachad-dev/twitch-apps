@@ -15,7 +15,7 @@ export default class Cat extends BaseCommand {
   constructor(client: Client) {
     super(client, {
       name: 'cat',
-      userlevel: 'everyone',
+      userlevel: ['everyone'],
       description: 'Случайная картинка котейки',
       aliases: ['кот']
     })

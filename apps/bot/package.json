@@ -6,17 +6,13 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "@twitch-apps/auth": "workspace:^1.0.0",
-    "@twitch-apps/irc": "workspace:^1.0.0",
-    "@twitch-apps/prisma": "workspace:^1.0.0",
+    "@twitch-apps/auth": "workspace:*",
+    "@twitch-apps/irc": "workspace:*",
+    "@twitch-apps/prisma": "workspace:*",
     "@twurple/api": "^5.2.5",
     "@twurple/chat": "^5.2.5",
     "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
-    "got": "^12.5.2",
-    "rotating-file-stream": "^3.0.4"
-  },
-  "volta": {
-    "node": "18.9.0"
+    "got": "^12.5.2"
   }
 }

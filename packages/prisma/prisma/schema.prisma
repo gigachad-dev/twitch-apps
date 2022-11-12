@@ -21,11 +21,15 @@ model Auth {
   obtainmentTimestamp DateTime
 }
 
-model Connection {
+model Channel {
   id Int @id @default(autoincrement())
+
+  connected Boolean @default(true)
 
   channelId   Int    @unique
   displayName String @unique
+
+  commands Command[]
 }
 
 model TextToSpeech {
@@ -40,4 +44,46 @@ model Balaboba {
   id Int @id @default(autoincrement())
 
   tts Boolean @default(false)
+}
+
+enum Userlevel {
+  everyone
+  subscriber
+  vip
+  moderator
+  regular
+  broadcaster
+}
+
+enum Sendtype {
+  say
+  reply
+  action
+}
+
+model Command {
+  id Int @id @default(autoincrement())
+
+  name      String    @unique
+  aliases   String[]  @default([])
+  message   String    @db.VarChar(500)
+  userlevel Userlevel @default(everyone)
+  sendType  Sendtype  @default(reply)
+  private   Boolean   @default(false)
+
+  cooldown         Int      @default(60)
+  lastCooldownTime DateTime
+
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId Int
+
+  timer Timer?
+}
+
+model Timer {
+  id Int @id @default(autoincrement())
+
+  interval  Int     @default(600)
+  command   Command @relation(fields: [commandId], references: [id])
+  commandId Int     @unique
 }

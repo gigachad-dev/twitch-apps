@@ -32,7 +32,7 @@ export default class TextToSpeech extends BaseCommand {
     super(client, {
       name: 'tts',
       description: 'Text to Speech',
-      userlevel: 'everyone',
+      userlevel: ['everyone'],
       aliases: ['ттс'],
       examples: [
         '!tts speed <number>',

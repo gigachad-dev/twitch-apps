@@ -9,12 +9,12 @@ export interface ParsedMessage {
   args: string[]
 }
 
-export type ArgumentValueType = string | number | boolean | null
+export type CommandArgValue = string | number | boolean | null
 
 export interface CommandArgs {
   name: string
-  defaultValue?: ArgumentValueType
-  transform: (value: ArgumentValueType) => ArgumentValueType
+  defaultValue?: CommandArgValue
+  transform: (value: CommandArgValue) => CommandArgValue
 }
 
 export class Commands {
@@ -39,7 +39,7 @@ export class Commands {
     return this.commands.find((command) => command.options.name === commandName)
   }
 
-  private parseArguments<T extends Record<string, ArgumentValueType>>(
+  private parseArguments<T extends Record<string, CommandArgValue>>(
     args: string[],
     argsMap: CommandArgs[]
   ): T {
@@ -109,20 +109,19 @@ export class Commands {
 enum UserLevel {
   everyone = 'everyone',
   subscriber = 'subscriber',
-  moderator = 'moderator',
   vip = 'vip',
+  moderator = 'moderator',
   regular = 'regular',
-  streamer = 'streamer'
+  broadcaster = 'broadcaster'
 }
 
 type UserLevels = keyof typeof UserLevel
 
 interface CommandOptions {
-  private?: boolean
+  name: string
+  userlevel: UserLevels[]
   description?: string
   examples?: string[]
-  name: string
-  userlevel: UserLevels
   aliases?: string[]
   args?: CommandArgs[]
 }
