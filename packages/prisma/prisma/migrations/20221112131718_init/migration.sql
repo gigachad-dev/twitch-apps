@@ -1,17 +1,20 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Connection` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "Userlevel" AS ENUM ('everyone', 'subscriber', 'vip', 'moderator', 'regular', 'broadcaster');
 
 -- CreateEnum
 CREATE TYPE "Sendtype" AS ENUM ('say', 'reply', 'action');
 
--- DropTable
-DROP TABLE "Connection";
+-- CreateTable
+CREATE TABLE "Auth" (
+    "id" SERIAL NOT NULL,
+    "accessToken" TEXT NOT NULL,
+    "refreshToken" TEXT,
+    "scope" TEXT[],
+    "expiresIn" INTEGER,
+    "obtainmentTimestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Auth_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Channel" (
@@ -24,12 +27,30 @@ CREATE TABLE "Channel" (
 );
 
 -- CreateTable
+CREATE TABLE "TextToSpeech" (
+    "id" SERIAL NOT NULL,
+    "volume" DOUBLE PRECISION NOT NULL,
+    "speed" DOUBLE PRECISION NOT NULL,
+    "voice" TEXT,
+
+    CONSTRAINT "TextToSpeech_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Balaboba" (
+    "id" SERIAL NOT NULL,
+    "tts" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Balaboba_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Command" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "aliases" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "message" VARCHAR(500) NOT NULL,
-    "userlevel" "Userlevel" NOT NULL DEFAULT 'everyone',
+    "userlevel" "Userlevel"[] DEFAULT ARRAY['everyone']::"Userlevel"[],
     "sendType" "Sendtype" NOT NULL DEFAULT 'reply',
     "private" BOOLEAN NOT NULL DEFAULT false,
     "cooldown" INTEGER NOT NULL DEFAULT 60,

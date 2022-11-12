@@ -1,7 +1,6 @@
 import type { Irc } from '@twitch-apps/irc'
 import type { PrismaClient } from '@twitch-apps/prisma'
 import type { ApiClient } from '@twurple/api/lib'
-import type { Commands } from './commands.js'
 
 export class Client {
   constructor(

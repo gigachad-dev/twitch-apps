@@ -1,4 +1,5 @@
 import { readdir } from 'node:fs/promises'
+import { Sendtype, Userlevel } from '@twitch-apps/prisma'
 import type { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
 import { Client } from './client.js'
 import { commandsPath } from './constants.js'
@@ -17,9 +18,11 @@ export interface CommandArgs {
   transform: (value: CommandArgValue) => CommandArgValue
 }
 
+const PREFIX = '!'
+
 export class Commands {
-  public readonly prefix = '!'
   private readonly commands: BaseCommand[] = []
+  private readonly commandsWithMessage = new Map<string, CommandWithMessage[]>()
 
   constructor(private readonly client: Client) {}
 
@@ -35,11 +38,45 @@ export class Commands {
     }
   }
 
+  async registerCommandsWithMessage(): Promise<void> {
+    const channels = await this.client.prisma.channel.findMany({
+      select: {
+        displayName: true,
+        commands: {
+          select: {
+            name: true,
+            message: true,
+            userlevel: true,
+            sendType: true
+          }
+        }
+      },
+      where: {
+        connected: true
+      }
+    })
+
+    for (const { displayName, commands } of channels) {
+      const commandsWithMessage: CommandWithMessage[] = []
+
+      for (const command of commands) {
+        commandsWithMessage.push(
+          new CommandWithMessage(this.client, {
+            ...command,
+            channel: displayName
+          })
+        )
+      }
+
+      this.commandsWithMessage.set(displayName, commandsWithMessage)
+    }
+  }
+
   private getCommand(commandName: string): BaseCommand<unknown> | undefined {
     return this.commands.find((command) => command.options.name === commandName)
   }
 
-  private parseArguments<T extends Record<string, CommandArgValue>>(
+  static parseArguments<T extends Record<string, CommandArgValue>>(
     args: string[],
     argsMap: CommandArgs[]
   ): T {
@@ -52,8 +89,8 @@ export class Commands {
     }, {} as T)
   }
 
-  parseMessage(message: string): ParsedMessage | null {
-    const regex = new RegExp(`^(${this.prefix})([^\\s]+) ?(.*)`, 'gims')
+  static parseMessage(message: string): ParsedMessage | null {
+    const regex = new RegExp(`^(${PREFIX})([^\\s]+) ?(.*)`, 'gims')
     const matches = regex.exec(message)
 
     if (matches) {
@@ -96,7 +133,7 @@ export class Commands {
     if (command) {
       const message = new Message(this, this.client, msg, channel)
       const args = command.options.args
-        ? this.parseArguments(parsedMessage.args, command.options.args)
+        ? Commands.parseArguments(parsedMessage.args, command.options.args)
         : parsedMessage.args
 
       command.run(message, args)
@@ -106,34 +143,61 @@ export class Commands {
 
 /** BaseCommand */
 
-enum UserLevel {
-  everyone = 'everyone',
-  subscriber = 'subscriber',
-  vip = 'vip',
-  moderator = 'moderator',
-  regular = 'regular',
-  broadcaster = 'broadcaster'
-}
-
-type UserLevels = keyof typeof UserLevel
-
 interface CommandOptions {
   name: string
-  userlevel: UserLevels[]
+  userlevel: Userlevel[]
   description?: string
   examples?: string[]
   aliases?: string[]
   args?: CommandArgs[]
 }
 
+interface CommandWithMessageOptions extends CommandOptions {
+  sendType: Sendtype
+  message: string
+  channel: string
+}
+
 export abstract class BaseCommand<T = unknown> extends Client {
-  constructor(
-    private readonly client: Client,
-    public readonly options: CommandOptions
-  ) {
+  constructor(client: Client, public readonly options: CommandOptions) {
     super(client.irc, client.api, client.prisma)
   }
 
   abstract run(msg: Message, ...args: T[]): any
   abstract exec(...args: T[]): any
+}
+
+export class CommandWithMessage extends Client {
+  constructor(
+    client: Client,
+    public readonly options: CommandWithMessageOptions
+  ) {
+    super(client.irc, client.api, client.prisma)
+  }
+
+  get channel() {
+    return this.options.channel
+  }
+
+  get message() {
+    return this.options.message
+  }
+
+  get sendType() {
+    return this.options.sendType
+  }
+
+  exec() {
+    const sendType = this.sendType === 'reply' ? 'say' : this.sendType
+    switch (sendType) {
+      case 'say':
+        return this.irc.say(this.channel, this.message)
+      case 'action':
+        return this.irc.action(this.channel, this.message)
+    }
+  }
+
+  run(msg: Message) {
+    msg[this.sendType](this.message)
+  }
 }

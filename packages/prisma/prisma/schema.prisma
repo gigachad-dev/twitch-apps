@@ -64,12 +64,12 @@ enum Sendtype {
 model Command {
   id Int @id @default(autoincrement())
 
-  name      String    @unique
-  aliases   String[]  @default([])
-  message   String    @db.VarChar(500)
-  userlevel Userlevel @default(everyone)
-  sendType  Sendtype  @default(reply)
-  private   Boolean   @default(false)
+  name      String      @unique
+  aliases   String[]    @default([])
+  message   String      @db.VarChar(500)
+  userlevel Userlevel[] @default([everyone])
+  sendType  Sendtype    @default(reply)
+  private   Boolean     @default(false)
 
   cooldown         Int      @default(60)
   lastCooldownTime DateTime

@@ -75,7 +75,7 @@ export class Bot {
     message: string,
     msg: TwitchPrivateMessage
   ): void {
-    const parsedMessage = this.commands.parseMessage(message)
+    const parsedMessage = Commands.parseMessage(message)
     if (parsedMessage) {
       this.commands.runCommand(parsedMessage, channel, msg)
     }
