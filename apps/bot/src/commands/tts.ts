@@ -1,4 +1,4 @@
-// sudo dns install sox
+// sudo dnf install sox
 // docker pull ghcr.io/rprtr258/tts:latest
 import { spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
@@ -32,12 +32,19 @@ export default class TextToSpeech extends BaseCommand {
     super(client, {
       name: 'tts',
       description: 'Text to Speech',
-      userlevel: ['everyone'],
+      userlevel: [
+        'vip',
+        'subscriber',
+        'moderator',
+        'broadcaster',
+        'regular'
+      ],
       aliases: ['ттс'],
       examples: [
-        '!tts speed <number>',
-        '!tts volume <number>',
-        '!tts voices'
+        'tts skip',
+        'tts speed <number>',
+        'tts volume <number>',
+        'tts voices'
       ]
     })
 
@@ -87,10 +94,7 @@ export default class TextToSpeech extends BaseCommand {
   async runManage(msg: Message, args: string[]) {
     switch (args[0]) {
       case 'skip': {
-        if (!this.playersQueue.length) return
-        const proc = this.playersQueue.shift()
-        if (!proc) return
-        proc.kill()
+        this.skipSpeech()
         break
       }
       case 'speed':
@@ -100,11 +104,18 @@ export default class TextToSpeech extends BaseCommand {
         this.updateVolume(msg, args[1]!)
         break
       case 'help':
-        msg.reply(`Доступные аргументы: !${this.options.examples!.join(', !')}`)
+        msg.reply(`Доступные аргументы: FIXME`)
         break
       default:
         this.speech(args)
     }
+  }
+
+  skipSpeech() {
+    if (!this.playersQueue.length) return
+    const proc = this.playersQueue.shift()
+    if (!proc) return
+    proc.kill()
   }
 
   async updateSpeed(msg: Message, arg: string) {
