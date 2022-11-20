@@ -48,6 +48,7 @@ model Balaboba {
 
 enum Userlevel {
   everyone
+  // follower
   subscriber
   vip
   moderator

@@ -115,6 +115,12 @@ export class Commands {
     return null
   }
 
+  helpCommand(commandName: string): string | undefined {
+    const command = this.getCommand(commandName)
+    if (!command?.options?.examples) return
+    return `${PREFIX}${command.options.examples.join(`, ${PREFIX}`)}`
+  }
+
   execCommand(commandName: string, ...args: any[]): void {
     const command = this.getCommand(commandName)
 
