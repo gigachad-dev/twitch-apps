@@ -29,6 +29,7 @@ export class Commands {
   async registerCommands(): Promise<void> {
     const paths = await readdir(commandsPath())
     for (const path of paths) {
+      if (path.includes('.d.ts')) continue
       const { default: Command } = await import(commandsPath(path))
       if (Command.prototype instanceof BaseCommand) {
         const cmd: BaseCommand = new Command(this.client)

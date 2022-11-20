@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "del-cli dist && tsc"
   },
   "dependencies": {
     "@twitch-apps/auth": "workspace:*",
