@@ -1,9 +1,9 @@
-import { PrismaClient } from '@twitch-apps/prisma'
 import { AuthProvider } from '@twitch-apps/auth'
-import { ApiClient } from '@twurple/api'
 import { Irc } from '@twitch-apps/irc'
-import { cleanEnv, str } from 'envalid'
+import { PrismaClient } from '@twitch-apps/prisma'
+import { ApiClient } from '@twurple/api'
 import 'dotenv/config'
+import { cleanEnv, str } from 'envalid'
 import { scopes } from './constants.js'
 
 export const config = cleanEnv(process.env, {
@@ -23,16 +23,16 @@ const authProvider = new AuthProvider({
   clientSecret: config.CLIENT_SECRET,
   initialToken: tokens
     ? {
-      ...tokens,
-      obtainmentTimestamp: tokens.obtainmentTimestamp.getTime()
-    }
+        ...tokens,
+        obtainmentTimestamp: tokens.obtainmentTimestamp.getTime()
+      }
     : {
-      accessToken: config.ACCESS_TOKEN,
-      refreshToken: config.REFRESH_TOKEN,
-      expiresIn: 1,
-      obtainmentTimestamp: 0,
-      scope: scopes
-    }
+        accessToken: config.ACCESS_TOKEN,
+        refreshToken: config.REFRESH_TOKEN,
+        expiresIn: 1,
+        obtainmentTimestamp: 0,
+        scope: scopes
+      }
 })
 
 const channels = await prismaClient.channel.findMany({
@@ -47,10 +47,10 @@ const channels = await prismaClient.channel.findMany({
 const apiClient = new ApiClient({ authProvider })
 const botInfo = await apiClient.users.getMe()
 
-const ircClient = new Irc(
-  authProvider,
-  [botInfo.displayName, ...channels.map((v) => v.displayName)]
-)
+const ircClient = new Irc(authProvider, [
+  botInfo.displayName,
+  ...channels.map((v) => v.displayName)
+])
 
 ircClient.onMessage((_, user, message) => console.log(`${user}: ${message}`))
 

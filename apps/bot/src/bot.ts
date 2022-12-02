@@ -7,7 +7,7 @@ import { Api } from './api.js'
 import { Client } from './client.js'
 import { Commands } from './commands.js'
 import { config } from './config.js'
-import { scopes } from './constants.js'
+import { builtInCommands, scopes } from './constants.js'
 
 export class Bot {
   private prismaClient: PrismaClient
@@ -42,6 +42,11 @@ export class Bot {
           }
     })
 
+    this.apiClient = new Api(this.authProvider)
+
+    const botInfo = await this.apiClient.users.getMe()
+    await this.updateChannel(botInfo.id, botInfo.displayName)
+
     const channels = await this.prismaClient.channel.findMany({
       where: {
         connected: true
@@ -51,12 +56,10 @@ export class Bot {
       }
     })
 
-    this.apiClient = new Api(this.authProvider)
-    const { displayName } = await this.apiClient.users.getMe()
-    this.ircClient = new Irc(this.authProvider, [
-      displayName,
-      ...channels.map((channel) => channel.displayName)
-    ])
+    this.ircClient = new Irc(
+      this.authProvider,
+      channels.map((channel) => channel.displayName)
+    )
 
     this.client = new Client(this.ircClient, this.apiClient, this.prismaClient)
     this.commands = new Commands(this.client)
@@ -67,6 +70,29 @@ export class Bot {
 
     await this.commands.registerCommands()
     await this.ircClient.connect()
+  }
+
+  async updateChannel(id: string, displayName: string) {
+    const channelId = Number(id)
+
+    await this.prismaClient.channel.upsert({
+      where: {
+        channelId
+      },
+      update: {
+        connected: true,
+        displayName
+      },
+      create: {
+        channelId,
+        displayName,
+        commands: {
+          createMany: {
+            data: builtInCommands
+          }
+        }
+      }
+    })
   }
 
   private onMessage(
@@ -84,10 +110,10 @@ export class Bot {
   }
 
   private onJoin(channel: string, user: string): void {
-    console.log('onJoin:', { channel, user })
+    console.log(`Join: ${user}`)
   }
 
   private onPart(channel: string, user: string): void {
-    console.log('onPart:', { channel, user })
+    console.log(`Leave: ${user}`)
   }
 }

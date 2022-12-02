@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises'
-import { Sendtype, Userlevel } from '@twitch-apps/prisma'
-import type { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
+import { Command } from '@twitch-apps/prisma'
+import { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
 import { Client } from './client.js'
 import { commandsPath } from './constants.js'
 import { Message } from './message.js'
@@ -21,8 +21,8 @@ export interface CommandArgs {
 const PREFIX = '!'
 
 export class Commands {
-  private readonly commands: BaseCommand[] = []
-  private readonly commandsWithMessage = new Map<string, CommandWithMessage[]>()
+  private readonly requiredCommands: BaseCommand[] = []
+  private readonly commands = new Map<number, BaseCommand[]>()
 
   constructor(private readonly client: Client) {}
 
@@ -32,16 +32,15 @@ export class Commands {
       if (path.includes('.d.ts')) continue
       const { default: Command } = await import(commandsPath(path))
       if (Command.prototype instanceof BaseCommand) {
-        const cmd: BaseCommand = new Command(this.client)
-        console.log(`[commands]: ${cmd.options.name}`)
-        this.commands.push(cmd)
+        this.requiredCommands.push(Command)
       }
     }
   }
 
-  async registerCommandsWithMessage(): Promise<void> {
-    const channels = await this.client.prisma.channel.findMany({
+  private async getChannelCommands() {
+    return await this.client.prisma.channel.findMany({
       select: {
+        channelId: true,
         displayName: true,
         commands: {
           select: {
@@ -56,25 +55,45 @@ export class Commands {
         connected: true
       }
     })
+  }
 
-    for (const { displayName, commands } of channels) {
+  async registerCommandsWithMessage(): Promise<void> {
+    const channels = await this.getChannelCommands()
+
+    for (const { channelId, displayName, commands } of channels) {
       const commandsWithMessage: CommandWithMessage[] = []
 
       for (const command of commands) {
         commandsWithMessage.push(
           new CommandWithMessage(this.client, {
             ...command,
+            message: command.message!,
             channel: displayName
           })
         )
       }
 
-      this.commandsWithMessage.set(displayName, commandsWithMessage)
+      if (this.commands.has(channelId)) {
+        const channelCommands = this.commands.get(channelId)
+        this.commands.set(channelId, [
+          ...channelCommands!,
+          ...commandsWithMessage
+        ])
+      } else {
+        this.commands.set(channelId, commandsWithMessage)
+      }
     }
   }
 
-  private getCommand(commandName: string): BaseCommand<unknown> | undefined {
-    return this.commands.find((command) => command.options.name === commandName)
+  private getCommand(
+    channelId: number,
+    commandName: string
+  ): BaseCommand<unknown> | undefined {
+    const channelCommands = this.commands.get(channelId)
+    if (!channelCommands) return
+    return channelCommands.find(
+      (command) => command.options.name === commandName
+    )
   }
 
   static parseArguments<T extends Record<string, CommandArgValue>>(
@@ -116,14 +135,8 @@ export class Commands {
     return null
   }
 
-  helpCommand(commandName: string): string | undefined {
-    const command = this.getCommand(commandName)
-    if (!command?.options?.examples) return
-    return `${PREFIX}${command.options.examples.join(`, ${PREFIX}`)}`
-  }
-
-  execCommand(commandName: string, ...args: any[]): void {
-    const command = this.getCommand(commandName)
+  execCommand(channelId: number, commandName: string, ...args: any[]): void {
+    const command = this.getCommand(channelId, commandName)
 
     if (command) {
       command.exec(...args)
@@ -135,38 +148,32 @@ export class Commands {
     channel: string,
     msg: TwitchPrivateMessage
   ): void {
-    const command = this.getCommand(parsedMessage.command)
-
+    if (!msg.channelId) return
+    const command = this.getCommand(
+      Number(msg.channelId),
+      parsedMessage.command
+    )
+    console.log({ command })
     if (command) {
       const message = new Message(this, this.client, msg, channel)
-      const args = command.options.args
-        ? Commands.parseArguments(parsedMessage.args, command.options.args)
-        : parsedMessage.args
-
-      command.run(message, args)
+      command.run(message, parsedMessage.args)
     }
   }
 }
 
 /** BaseCommand */
-
-interface CommandOptions {
-  name: string
-  userlevel: Userlevel[]
-  description?: string
-  examples?: string[]
-  aliases?: string[]
-  args?: CommandArgs[]
+export interface CommandsOptions extends Partial<Omit<Command, 'message'>> {
+  channel: string
+  args?: string[]
 }
 
-interface CommandWithMessageOptions extends CommandOptions {
-  sendType: Sendtype
+export interface CommandsOptionsWithMessage extends CommandsOptions {
+  sendType: Command['sendType']
   message: string
-  channel: string
 }
 
 export abstract class BaseCommand<T = unknown> extends Client {
-  constructor(client: Client, public readonly options: CommandOptions) {
+  constructor(client: Client, public readonly options: CommandsOptions) {
     super(client.irc, client.api, client.prisma)
   }
 
@@ -177,7 +184,7 @@ export abstract class BaseCommand<T = unknown> extends Client {
 export class CommandWithMessage extends Client {
   constructor(
     client: Client,
-    public readonly options: CommandWithMessageOptions
+    public readonly options: CommandsOptionsWithMessage
   ) {
     super(client.irc, client.api, client.prisma)
   }

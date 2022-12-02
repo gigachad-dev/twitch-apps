@@ -2,6 +2,7 @@ import type { HelixUser } from '@twurple/api/lib/index.js'
 import type { Client } from '../client.js'
 import type { Message } from '../message.js'
 import { BaseCommand } from '../commands.js'
+import type { CommandsOptions } from '../commands.js'
 
 interface Args {
   action: 'join' | 'part'
@@ -9,27 +10,8 @@ interface Args {
 }
 
 export default class Irc extends BaseCommand {
-  constructor(client: Client) {
-    super(client, {
-      name: 'irc',
-      userlevel: ['everyone'],
-      args: [
-        {
-          name: 'action',
-          defaultValue: null,
-          transform(value) {
-            return value === 'join' || value === 'part' ? value : null
-          }
-        },
-        {
-          name: 'username',
-          defaultValue: null,
-          transform(value) {
-            return value
-          }
-        }
-      ]
-    })
+  constructor(client: Client, options: CommandsOptions) {
+    super(client, options)
   }
 
   exec(...args: unknown[]) {

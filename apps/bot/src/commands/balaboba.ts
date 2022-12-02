@@ -2,6 +2,7 @@ import { Prisma } from '@twitch-apps/prisma'
 import got from 'got'
 import type { Client } from '../client.js'
 import { BaseCommand } from '../commands.js'
+import type { CommandsOptions } from '../commands.js'
 import type { Message } from '../message.js'
 
 interface BalabobaResponse {
@@ -36,17 +37,8 @@ const BALABOBA_STYLES = {
 const BALABOBA_STYLES_ID = Object.keys(BALABOBA_STYLES)
 
 export default class Balaboba extends BaseCommand {
-  constructor(client: Client) {
-    super(client, {
-      name: 'balaboba',
-      userlevel: ['everyone'],
-      examples: [
-        '!balaboba <query>',
-        '!balaboba <style> <query>',
-        '!balaboba styles',
-        '!balaboba tts'
-      ]
-    })
+  constructor(client: Client, options: CommandsOptions) {
+    super(client, options)
 
     this.getOptions().then((value) => {
       if (!value) {
@@ -60,10 +52,6 @@ export default class Balaboba extends BaseCommand {
   }
 
   async run(msg: Message, args: string[]) {
-    if (args.length === 0) {
-      return this.replyHelp(msg)
-    }
-
     if (args[0] === 'styles') {
       return this.replyStyles(msg)
     }
@@ -115,10 +103,6 @@ export default class Balaboba extends BaseCommand {
     } catch (err) {
       msg.reply((err as Error).message)
     }
-  }
-
-  replyHelp(msg: Message) {
-    msg.reply(`[Balaboba] Команды: ${this.options.examples!.join(', ')}`)
   }
 
   replyStyles(msg: Message): void {

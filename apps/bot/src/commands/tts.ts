@@ -5,7 +5,7 @@ import type { ChildProcess } from 'node:child_process'
 import { homedir, type } from 'node:os'
 import type { Prisma } from '@twitch-apps/prisma'
 import type { Client } from '../client.js'
-import { BaseCommand } from '../commands.js'
+import { BaseCommand, CommandsOptions } from '../commands.js'
 import type { Message } from '../message.js'
 
 const UNIX_OPTIONS = {
@@ -28,25 +28,8 @@ export default class TextToSpeech extends BaseCommand {
   private queue: string[][] = []
   private playersQueue: ChildProcess[] = []
 
-  constructor(client: Client) {
-    super(client, {
-      name: 'tts',
-      description: 'Text to Speech',
-      userlevel: [
-        'vip',
-        'subscriber',
-        'moderator',
-        'broadcaster',
-        'regular'
-      ],
-      aliases: ['ттс'],
-      examples: [
-        'tts skip',
-        'tts speed <number>',
-        'tts volume <number>',
-        'tts voices'
-      ]
-    })
+  constructor(client: Client, options: CommandsOptions) {
+    super(client, options)
 
     this.getOptions().then((value) => {
       const initialOptions = INITIAL_OPTIONS[type()]
@@ -61,10 +44,6 @@ export default class TextToSpeech extends BaseCommand {
   }
 
   async run(msg: Message, args: string[]): Promise<void> {
-    if (args.length === 0) {
-      return this.replyHelp(msg)
-    }
-
     if (args.length > 0) {
       if (msg.userInfo.isBroadcaster) {
         this.runManage(msg, args)
@@ -85,10 +64,6 @@ export default class TextToSpeech extends BaseCommand {
         `${this.options.description}, volume: ${volume}, speed: ${speed}, voice: ${voice}`
       )
     }
-  }
-
-  replyHelp(msg: Message): void {
-    msg.reply(`[TTS] Команды: ${this.options.examples!.join(', ')}`)
   }
 
   async runManage(msg: Message, args: string[]) {

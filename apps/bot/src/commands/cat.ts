@@ -1,6 +1,7 @@
 import got from 'got'
 import { Client } from '../client.js'
 import { BaseCommand } from '../commands.js'
+import type { CommandsOptions } from '../commands.js'
 import { randomInt } from '../helpers/random-int.js'
 import { Message } from '../message.js'
 
@@ -12,13 +13,8 @@ export interface CatApiResponse {
 }
 
 export default class Cat extends BaseCommand {
-  constructor(client: Client) {
-    super(client, {
-      name: 'cat',
-      userlevel: ['everyone'],
-      description: 'Случайная картинка котейки',
-      aliases: ['кот']
-    })
+  constructor(client: Client, options: CommandsOptions) {
+    super(client, options)
   }
 
   exec(...args: unknown[]) {
