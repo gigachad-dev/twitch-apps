@@ -40,6 +40,26 @@ importers:
       envalid: 7.3.1
       got: 12.5.2
 
+  apps/sandbox:
+    specifiers:
+      '@twitch-apps/auth': workspace:1.0.0
+      '@twitch-apps/irc': workspace:*
+      '@twitch-apps/prisma': workspace:*
+      '@twurple/api': ^5.2.5
+      '@twurple/chat': ^5.2.5
+      dotenv: ^16.0.3
+      envalid: ^7.3.1
+      got: ^12.5.2
+    dependencies:
+      '@twitch-apps/auth': link:../../packages/auth
+      '@twitch-apps/irc': link:../../packages/irc
+      '@twitch-apps/prisma': link:../../packages/prisma
+      '@twurple/api': 5.2.5_@twurple+auth@5.2.5
+      '@twurple/chat': 5.2.5_@twurple+auth@5.2.5
+      dotenv: 16.0.3
+      envalid: 7.3.1
+      got: 12.5.2
+
   packages/auth:
     specifiers:
       '@twitch-apps/prisma': workspace:*
@@ -690,7 +710,7 @@ packages:
   /@types/ws/8.5.3:
     resolution: {integrity: sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==}
     dependencies:
-      '@types/node': 16.18.3
+      '@types/node': 18.11.9
     dev: false
 
   /@vue/compiler-core/3.2.45:
