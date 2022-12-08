@@ -1,8 +1,18 @@
 import { AuthProvider } from '@twitch-apps/auth'
-import { ChatClient } from '@twurple/chat'
+import { Client } from '@twurple/auth-tmi'
 
-export class Irc extends ChatClient {
-  constructor(authProvider: AuthProvider, channels: string[]) {
-    super({ authProvider, channels })
+export class IrcClient extends Client {
+  constructor(authProvider: AuthProvider, channel: string) {
+    super({
+      options: {
+        debug: true
+      },
+      connection: {
+        secure: true,
+        reconnect: true
+      },
+      authProvider,
+      channels: [channel]
+    })
   }
 }

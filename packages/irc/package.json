@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "@twitch-apps/auth": "workspace:*",
-    "@twurple/chat": "^5.2.5"
+    "@twurple/auth-tmi": "^5.2.7"
   }
 }

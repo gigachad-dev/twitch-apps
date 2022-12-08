@@ -13,9 +13,9 @@
     "prepare": "pnpm build"
   },
   "dependencies": {
-    "@prisma/client": "^4.6.1"
+    "@prisma/client": "^4.7.1"
   },
   "devDependencies": {
-    "prisma": "^4.6.1"
+    "prisma": "^4.7.1"
   }
 }

@@ -4,9 +4,10 @@ import { spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { homedir, type } from 'node:os'
 import type { Prisma } from '@twitch-apps/prisma'
+import { ChatMessage } from '../chat/chat-message.js'
 import type { Client } from '../client.js'
-import { BaseCommand, CommandsOptions } from '../commands.js'
-import type { Message } from '../message.js'
+import { BaseCommand } from './model/base-command.js'
+import type { CommandOptions } from './model/types.js'
 
 const UNIX_OPTIONS = {
   volume: 0.2,
@@ -28,7 +29,7 @@ export default class TextToSpeech extends BaseCommand {
   private queue: string[][] = []
   private playersQueue: ChildProcess[] = []
 
-  constructor(client: Client, options: CommandsOptions) {
+  constructor(client: Client, options: CommandOptions) {
     super(client, options)
 
     this.getOptions().then((value) => {
@@ -43,14 +44,14 @@ export default class TextToSpeech extends BaseCommand {
     this.speech([args])
   }
 
-  async run(msg: Message, args: string[]): Promise<void> {
+  async run(msg: ChatMessage, args: string[]): Promise<void> {
     if (args.length > 0) {
-      if (msg.userInfo.isBroadcaster) {
+      if (msg.author.isBroadcaster) {
         this.runManage(msg, args)
       } else if (
-        msg.userInfo.isVip ||
-        msg.userInfo.isSubscriber ||
-        msg.userInfo.isMod
+        msg.author.isVip ||
+        msg.author.isSubscriber ||
+        msg.author.isModerator
       ) {
         this.speech(args)
       } else {
@@ -66,7 +67,7 @@ export default class TextToSpeech extends BaseCommand {
     }
   }
 
-  async runManage(msg: Message, args: string[]) {
+  async runManage(msg: ChatMessage, args: string[]) {
     switch (args[0]) {
       case 'skip': {
         this.skipSpeech()
@@ -93,7 +94,7 @@ export default class TextToSpeech extends BaseCommand {
     proc.kill()
   }
 
-  async updateSpeed(msg: Message, arg: string) {
+  async updateSpeed(msg: ChatMessage, arg: string) {
     try {
       const speed = Number(arg)
 
@@ -114,7 +115,7 @@ export default class TextToSpeech extends BaseCommand {
     }
   }
 
-  async updateVolume(msg: Message, arg: string) {
+  async updateVolume(msg: ChatMessage, arg: string) {
     try {
       const volume = Number(arg)
 
@@ -207,13 +208,13 @@ export default class TextToSpeech extends BaseCommand {
   }
 
   async getOptions() {
-    return await this.prisma.textToSpeech.findFirst({
+    return await this.client.prisma.textToSpeech.findFirst({
       where: { id: 1 }
     })
   }
 
   async updateOptions(options: Prisma.TextToSpeechCreateInput) {
-    await this.prisma.textToSpeech.upsert({
+    await this.client.prisma.textToSpeech.upsert({
       where: { id: 1 },
       create: options,
       update: options

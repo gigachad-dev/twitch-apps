@@ -1,23 +1,21 @@
 import { AuthProvider } from '@twitch-apps/auth'
-import { Irc } from '@twitch-apps/irc'
+import { IrcClient } from '@twitch-apps/irc'
 import { PrismaClient } from '@twitch-apps/prisma'
 import { ApiClient } from '@twurple/api'
-import { TwitchPrivateMessage } from '@twurple/chat/lib/commands/TwitchPrivateMessage.js'
-import { Api } from './api.js'
+import { ChatUserstate } from '@twurple/auth-tmi/lib/index.js'
+import { ChatMessage } from './chat/index.js'
+import { ChatterState } from './chat/types.js'
 import { Client } from './client.js'
-import { Commands } from './commands.js'
+import { CommandParser } from './commands/model/parser.js'
 import { config } from './config.js'
-import { builtInCommands, scopes } from './constants.js'
+import { scopes } from './constants.js'
 
 export class Bot {
   private prismaClient: PrismaClient
   private authProvider: AuthProvider
-  private ircClient: Irc
+  private ircClient: IrcClient
   private apiClient: ApiClient
-  private commands: Commands
   private client: Client
-
-  constructor() {}
 
   async connect(): Promise<void> {
     this.prismaClient = new PrismaClient()
@@ -42,78 +40,47 @@ export class Bot {
           }
     })
 
-    this.apiClient = new Api(this.authProvider)
+    this.apiClient = new ApiClient({
+      authProvider: this.authProvider
+    })
 
     const botInfo = await this.apiClient.users.getMe()
-    await this.updateChannel(botInfo.id, botInfo.displayName)
 
-    const channels = await this.prismaClient.channel.findMany({
-      where: {
-        connected: true
-      },
-      select: {
-        displayName: true
-      }
-    })
-
-    this.ircClient = new Irc(
-      this.authProvider,
-      channels.map((channel) => channel.displayName)
-    )
+    this.ircClient = new IrcClient(this.authProvider, botInfo.displayName)
 
     this.client = new Client(this.ircClient, this.apiClient, this.prismaClient)
-    this.commands = new Commands(this.client)
 
-    this.ircClient.onMessage(this.onMessage.bind(this))
-    this.ircClient.onJoin(this.onJoin.bind(this))
-    this.ircClient.onPart(this.onPart.bind(this))
-
-    await this.commands.registerCommands()
     await this.ircClient.connect()
+
+    this.ircClient.on('message', this.onMessage.bind(this))
   }
 
-  async updateChannel(id: string, displayName: string) {
-    const channelId = Number(id)
-
-    await this.prismaClient.channel.upsert({
-      where: {
-        channelId
-      },
-      update: {
-        connected: true,
-        displayName
-      },
-      create: {
-        channelId,
-        displayName,
-        commands: {
-          createMany: {
-            data: builtInCommands
-          }
-        }
-      }
-    })
-  }
-
-  private onMessage(
+  private async onMessage(
     channel: string,
-    user: string,
-    message: string,
-    msg: TwitchPrivateMessage
-  ): void {
-    const parsedMessage = Commands.parseMessage(message)
-    if (parsedMessage) {
-      this.commands.runCommand(parsedMessage, channel, msg)
+    userstate: ChatUserstate,
+    messageText: string,
+    self: boolean
+  ): Promise<void> {
+    if (self) return
+
+    const chatter = { ...userstate, message: messageText } as ChatterState
+    const msg = new ChatMessage(this.client, chatter, channel)
+
+    if (msg.author.username === this.ircClient.getUsername()) {
+      if (
+        !(
+          msg.author.isBroadcaster ||
+          msg.author.isModerator ||
+          msg.author.isVip
+        )
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
     }
 
-    console.log(`${user}:`, message)
-  }
-
-  private onJoin(channel: string, user: string): void {
-    console.log(`Join: ${user}`)
-  }
-
-  private onPart(channel: string, user: string): void {
-    console.log(`Leave: ${user}`)
+    const res = CommandParser.parse(messageText)
+    if (res) {
+      console.log(res)
+    }
   }
 }

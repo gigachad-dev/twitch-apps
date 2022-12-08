@@ -21,17 +21,6 @@ model Auth {
   obtainmentTimestamp DateTime
 }
 
-model Channel {
-  id Int @id @default(autoincrement())
-
-  connected Boolean @default(true)
-
-  channelId   Int    @unique
-  displayName String @unique
-
-  commands Command[]
-}
-
 model TextToSpeech {
   id Int @id @default(autoincrement())
 
@@ -48,12 +37,11 @@ model Balaboba {
 
 enum Userlevel {
   everyone
-  // follower
+  follower
   subscriber
   vip
   moderator
-  regular
-  broadcaster
+  owner
 }
 
 enum Sendtype {
@@ -62,30 +50,24 @@ enum Sendtype {
   action
 }
 
+enum CommandType {
+  custom
+  embedded
+}
+
 model Command {
   id Int @id @default(autoincrement())
 
   name        String      @unique
-  description String?     @db.VarChar(128)
-  message     String?     @db.VarChar(500)
+  description String?     @db.VarChar(64)
   aliases     String[]    @default([])
   userlevel   Userlevel[] @default([everyone])
+
   sendType    Sendtype    @default(reply)
-  private     Boolean     @default(false)
+  commandType CommandType @default(custom)
+  responses   String[]    @default([])
 
-  cooldown         Int       @default(60)
+  cooldown         Int         @default(60)
   lastCooldownTime DateTime?
-
-  channel   Channel @relation(fields: [channelId], references: [id])
-  channelId Int
-
-  timer Timer?
-}
-
-model Timer {
-  id Int @id @default(autoincrement())
-
-  interval  Int     @default(600)
-  command   Command @relation(fields: [commandId], references: [id])
-  commandId Int     @unique
+  ignoreCooldown   Userlevel[] @default([owner])
 }

@@ -1,9 +1,9 @@
-import { Prisma } from '@twitch-apps/prisma'
+import type { Prisma } from '@twitch-apps/prisma'
 import got from 'got'
+import type { ChatMessage } from '../chat/chat-message.js'
 import type { Client } from '../client.js'
-import { BaseCommand } from '../commands.js'
-import type { CommandsOptions } from '../commands.js'
-import type { Message } from '../message.js'
+import { BaseCommand } from './model/base-command.js'
+import type { CommandOptions } from './model/types.js'
 
 interface BalabobaResponse {
   bad_query: number
@@ -37,7 +37,7 @@ const BALABOBA_STYLES = {
 const BALABOBA_STYLES_ID = Object.keys(BALABOBA_STYLES)
 
 export default class Balaboba extends BaseCommand {
-  constructor(client: Client, options: CommandsOptions) {
+  constructor(client: Client, options: CommandOptions) {
     super(client, options)
 
     this.getOptions().then((value) => {
@@ -51,7 +51,7 @@ export default class Balaboba extends BaseCommand {
     throw new Error('Method not implemented.')
   }
 
-  async run(msg: Message, args: string[]) {
+  async run(msg: ChatMessage, args: string[]) {
     if (args[0] === 'styles') {
       return this.replyStyles(msg)
     }
@@ -96,7 +96,8 @@ export default class Balaboba extends BaseCommand {
       const message = `${intro === 8 ? query : ''} ${res.text}`
 
       if (options.tts) {
-        msg.commands.execCommand('tts', message)
+        // TODO: FIXME
+        // msg.commands.execCommand('tts', message)
       } else {
         msg.reply(message)
       }
@@ -105,7 +106,7 @@ export default class Balaboba extends BaseCommand {
     }
   }
 
-  replyStyles(msg: Message): void {
+  replyStyles(msg: ChatMessage): void {
     const styles = Object.entries(BALABOBA_STYLES)
       .map(([styleId, description]) => `${styleId} — ${description}`)
       .join(', ')
@@ -113,7 +114,7 @@ export default class Balaboba extends BaseCommand {
     msg.reply(`[Balaboba] Стили: ${styles}`)
   }
 
-  async toggleTextToSpeech(msg: Message) {
+  async toggleTextToSpeech(msg: ChatMessage) {
     const options = await this.getOptions()
     if (!options) return
 
@@ -128,7 +129,7 @@ export default class Balaboba extends BaseCommand {
   }
 
   async updateOptions(options: Prisma.BalabobaCreateInput) {
-    await this.prisma.balaboba.upsert({
+    await this.client.prisma.balaboba.upsert({
       where: { id: 1 },
       create: options,
       update: options
@@ -136,7 +137,7 @@ export default class Balaboba extends BaseCommand {
   }
 
   async getOptions() {
-    return await this.prisma.balaboba.findFirst({
+    return await this.client.prisma.balaboba.findFirst({
       where: { id: 1 }
     })
   }

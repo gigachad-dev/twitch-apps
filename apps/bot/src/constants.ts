@@ -1,7 +1,3 @@
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import type { Prisma } from '@twitch-apps/prisma'
-
 export const scopes = [
   'analytics:read:extensions',
   'user:edit',
@@ -54,37 +50,4 @@ export const scopes = [
   'channel:read:vips',
   'channel:manage:vips',
   'user:manage:whispers'
-]
-
-export const commandsPath = (command: string = ''): string => {
-  return resolve(dirname(fileURLToPath(import.meta.url)), 'commands', command)
-}
-
-export const builtInCommands: Prisma.CommandCreateManyChannelInput[] = [
-  {
-    name: 'balaboba',
-    userlevel: ['everyone']
-  },
-  {
-    name: 'cat',
-    userlevel: ['everyone'],
-    description: 'Случайная картинка котейки',
-    aliases: ['кот']
-  },
-  {
-    name: 'irc',
-    userlevel: ['everyone']
-  },
-  {
-    name: 'tts',
-    description: 'Text to Speech',
-    userlevel: [
-      'vip',
-      'subscriber',
-      'moderator',
-      'broadcaster',
-      'regular'
-    ],
-    aliases: ['ттс']
-  }
 ]
