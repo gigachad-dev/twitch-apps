@@ -2,17 +2,31 @@ import got from 'got'
 import type { ChatMessage } from '../chat/chat-message.js'
 import type { Client } from '../client.js'
 import { randomInt } from '../helpers/random-int.js'
-import { BaseCommand } from './model/base-command.js'
-import type { CommandOptions } from './model/types.js'
+import {
+  BaseCommand,
+  CommandDefaultOptions,
+  CommandOptions
+} from './model/index.js'
 
-export interface CatApiResponse {
+interface CatApiResponse {
   id: string
   created_at: string
   tags: string[]
   url: string
 }
 
-export default class Cat extends BaseCommand {
+export class Cat extends BaseCommand {
+  static get defaultOptions(): CommandDefaultOptions {
+    return {
+      name: 'cat',
+      userlevel: ['everyone'],
+      aliases: ['кот'],
+      args: [],
+      sendType: 'reply',
+      description: null
+    }
+  }
+
   constructor(client: Client, options: CommandOptions) {
     super(client, options)
   }

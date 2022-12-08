@@ -1,5 +1,6 @@
 import type { ChatUserstate, CommonUserstate } from '@twurple/auth-tmi'
 import type { Client } from '../client.js'
+import type { Commands } from '../commands/model/commands.js'
 import { ChatChannel } from './chat-channel.js'
 import { ChatUser } from './chat-user.js'
 import type { ChatterState } from './types.js'
@@ -11,6 +12,7 @@ export class ChatMessage {
   constructor(
     private readonly client: Client,
     private readonly originalMessage: ChatterState,
+    readonly commands: Commands,
     channel: string
   ) {
     this.chatChannel = new ChatChannel({

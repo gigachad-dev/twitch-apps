@@ -37,3 +37,8 @@ export interface CommandArgument {
 export type NamedParameters = Record<string, string | number | boolean | null>
 
 export type CommandProvider = Record<string, CommandOptions>
+
+export type CommandDefaultOptions = Omit<
+  CommandOptions,
+  'commandType' | 'responses'
+>

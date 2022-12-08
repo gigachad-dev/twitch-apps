@@ -6,7 +6,7 @@ import type { CommandOptions, NamedParameters } from './types.js'
 export class BaseCommand {
   constructor(public client: Client, public options: CommandOptions) {}
 
-  async execute(msg: ChatMessage): Promise<any> {}
+  exec(...args: any[]): void {}
 
   async run(msg: ChatMessage, parameters: unknown): Promise<any> {}
 

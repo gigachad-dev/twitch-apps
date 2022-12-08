@@ -2,8 +2,11 @@ import type { Prisma } from '@twitch-apps/prisma'
 import got from 'got'
 import type { ChatMessage } from '../chat/chat-message.js'
 import type { Client } from '../client.js'
-import { BaseCommand } from './model/base-command.js'
-import type { CommandOptions } from './model/types.js'
+import {
+  BaseCommand,
+  CommandDefaultOptions,
+  CommandOptions
+} from './model/index.js'
 
 interface BalabobaResponse {
   bad_query: number
@@ -36,7 +39,18 @@ const BALABOBA_STYLES = {
 
 const BALABOBA_STYLES_ID = Object.keys(BALABOBA_STYLES)
 
-export default class Balaboba extends BaseCommand {
+export class Balaboba extends BaseCommand {
+  static get defaultOptions(): CommandDefaultOptions {
+    return {
+      name: 'balaboba',
+      userlevel: ['vip'],
+      aliases: ['балабоба'],
+      args: [],
+      sendType: 'say',
+      description: null
+    }
+  }
+
   constructor(client: Client, options: CommandOptions) {
     super(client, options)
 
@@ -96,8 +110,7 @@ export default class Balaboba extends BaseCommand {
       const message = `${intro === 8 ? query : ''} ${res.text}`
 
       if (options.tts) {
-        // TODO: FIXME
-        // msg.commands.execCommand('tts', message)
+        msg.commands.execCommand('tts', message)
       } else {
         msg.reply(message)
       }

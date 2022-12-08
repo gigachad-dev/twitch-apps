@@ -6,8 +6,11 @@ import { homedir, type } from 'node:os'
 import type { Prisma } from '@twitch-apps/prisma'
 import { ChatMessage } from '../chat/chat-message.js'
 import type { Client } from '../client.js'
-import { BaseCommand } from './model/base-command.js'
-import type { CommandOptions } from './model/types.js'
+import {
+  BaseCommand,
+  CommandDefaultOptions,
+  CommandOptions
+} from './model/index.js'
 
 const UNIX_OPTIONS = {
   volume: 0.2,
@@ -24,7 +27,18 @@ const INITIAL_OPTIONS: Record<string, Prisma.TextToSpeechCreateInput> = {
   }
 }
 
-export default class TextToSpeech extends BaseCommand {
+export class TextToSpeech extends BaseCommand {
+  static get defaultOptions(): CommandDefaultOptions {
+    return {
+      name: 'tts',
+      userlevel: ['vip', 'subscriber'],
+      aliases: ['ттс'],
+      args: [],
+      sendType: 'reply',
+      description: null
+    }
+  }
+
   private playing = false
   private queue: string[][] = []
   private playersQueue: ChildProcess[] = []
@@ -40,7 +54,7 @@ export default class TextToSpeech extends BaseCommand {
     })
   }
 
-  exec(args: string): void {
+  exec(args: string) {
     this.speech([args])
   }
 

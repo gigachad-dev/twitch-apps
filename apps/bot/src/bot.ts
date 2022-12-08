@@ -6,6 +6,7 @@ import { ChatUserstate } from '@twurple/auth-tmi/lib/index.js'
 import { ChatMessage } from './chat/index.js'
 import { ChatterState } from './chat/types.js'
 import { Client } from './client.js'
+import { Commands } from './commands/model/commands.js'
 import { CommandParser } from './commands/model/parser.js'
 import { config } from './config.js'
 import { scopes } from './constants.js'
@@ -15,7 +16,8 @@ export class Bot {
   private authProvider: AuthProvider
   private ircClient: IrcClient
   private apiClient: ApiClient
-  private client: Client
+  private botClient: Client
+  private botCommands: Commands
 
   async connect(): Promise<void> {
     this.prismaClient = new PrismaClient()
@@ -40,15 +42,19 @@ export class Bot {
           }
     })
 
-    this.apiClient = new ApiClient({
-      authProvider: this.authProvider
-    })
+    this.apiClient = new ApiClient({ authProvider: this.authProvider })
 
     const botInfo = await this.apiClient.users.getMe()
 
     this.ircClient = new IrcClient(this.authProvider, botInfo.displayName)
 
-    this.client = new Client(this.ircClient, this.apiClient, this.prismaClient)
+    this.botClient = new Client(
+      this.ircClient,
+      this.apiClient,
+      this.prismaClient
+    )
+
+    this.botCommands = new Commands(this.botClient)
 
     await this.ircClient.connect()
 
@@ -64,7 +70,12 @@ export class Bot {
     if (self) return
 
     const chatter = { ...userstate, message: messageText } as ChatterState
-    const msg = new ChatMessage(this.client, chatter, channel)
+    const msg = new ChatMessage(
+      this.botClient,
+      chatter,
+      this.botCommands,
+      channel
+    )
 
     if (msg.author.username === this.ircClient.getUsername()) {
       if (
@@ -78,9 +89,21 @@ export class Bot {
       }
     }
 
-    const res = CommandParser.parse(messageText)
-    if (res) {
-      console.log(res)
+    const commandArgs = CommandParser.parse(messageText)
+    if (commandArgs) {
+      const command = this.botCommands.getRegisteredCommand(commandArgs.command)
+      if (command) {
+        const preValidateResponse = command.preValidate(msg)
+        if (typeof preValidateResponse === 'string') {
+          msg.reply(preValidateResponse)
+        } else {
+          if (command.options.args.length) {
+            command.prepareRun(msg, commandArgs.args)
+          } else {
+            command.run(msg, commandArgs.args)
+          }
+        }
+      }
     }
   }
 }
