@@ -70,38 +70,22 @@ export class Bot {
     if (self) return
 
     const chatter = { ...userstate, message: messageText } as ChatterState
-    const msg = new ChatMessage(
-      this.botClient,
-      chatter,
-      this.botCommands,
-      channel
-    )
-
-    if (msg.author.username === this.ircClient.getUsername()) {
-      if (
-        !(
-          msg.author.isBroadcaster ||
-          msg.author.isModerator ||
-          msg.author.isVip
-        )
-      ) {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      }
-    }
+    const msg = new ChatMessage(this.botClient, chatter, channel)
 
     const commandArgs = CommandParser.parse(messageText)
     if (commandArgs) {
       const command = this.botCommands.getRegisteredCommand(commandArgs.command)
       if (command) {
-        const preValidateResponse = command.preValidate(msg)
-        if (typeof preValidateResponse === 'string') {
-          msg.reply(preValidateResponse)
+        const isValidUserlevel = command.validateUserlevel(msg)
+        if (typeof isValidUserlevel === 'string') {
+          msg.reply(isValidUserlevel)
+          return
+        }
+
+        if (command.options.args.length) {
+          command.prepareRun(msg, commandArgs.args)
         } else {
-          if (command.options.args.length) {
-            command.prepareRun(msg, commandArgs.args)
-          } else {
-            command.run(msg, commandArgs.args)
-          }
+          command.run(msg, commandArgs.args)
         }
       }
     }

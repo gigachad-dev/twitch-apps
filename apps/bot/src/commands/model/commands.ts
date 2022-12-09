@@ -7,14 +7,14 @@ import { BaseCommand } from './base-command.js'
 
 export class Commands {
   private readonly commands: BaseCommand[] = []
-  private readonly embeddedCommands = [
+  private readonly builtInCommands = [
     Balaboba,
     TextToSpeech,
     Cat
   ]
 
   constructor(private readonly client: Client) {
-    this.initializeEmbeddedCommands()
+    this.initializeBuiltInCommands()
     this.registerCommands()
   }
 
@@ -26,7 +26,7 @@ export class Commands {
         case 'custom':
           break
         case 'embedded':
-          const EmbeddedCommand = this.getEmbeddedCommand(commandOptions.name)
+          const EmbeddedCommand = this.getBuiltInCommand(commandOptions.name)
           if (EmbeddedCommand) {
             this.commands.push(
               new EmbeddedCommand(this.client, {
@@ -40,7 +40,7 @@ export class Commands {
     }
   }
 
-  private async initializeEmbeddedCommands(): Promise<void> {
+  private async initializeBuiltInCommands(): Promise<void> {
     const countCommands = await this.client.prisma.command.count({
       where: {
         commandType: 'embedded'
@@ -49,7 +49,7 @@ export class Commands {
 
     if (countCommands) return
 
-    const embeddedCommands = this.embeddedCommands.map((command) => ({
+    const embeddedCommands = this.builtInCommands.map((command) => ({
       ...command.defaultOptions,
       commandType: 'embedded' as CommandType
     }))
@@ -59,8 +59,8 @@ export class Commands {
     })
   }
 
-  getEmbeddedCommand(commandName: string) {
-    return this.embeddedCommands.find(
+  getBuiltInCommand(commandName: string) {
+    return this.builtInCommands.find(
       (command) => command.defaultOptions.name === commandName
     )
   }

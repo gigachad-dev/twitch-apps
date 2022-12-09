@@ -44,7 +44,7 @@ export class BaseCommand {
     await this.run(msg, namedParameters)
   }
 
-  preValidate(msg: ChatMessage): string | boolean {
+  validateUserlevel(msg: ChatMessage): string | boolean {
     if (this.options.userlevel.includes(Userlevel.everyone)) {
       return true
     }
