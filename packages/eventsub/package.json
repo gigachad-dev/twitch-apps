@@ -1,0 +1,17 @@
+{
+  "name": "@twitch-apps/eventsub",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@twurple/eventsub": "^5.2.7",
+    "@twurple/eventsub-ngrok": "^5.2.7"
+  }
+}

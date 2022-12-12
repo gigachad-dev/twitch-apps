@@ -1,7 +1,10 @@
 import { AuthProvider } from '@twitch-apps/auth'
+import { EventSub } from '@twitch-apps/eventsub'
 import { IrcClient } from '@twitch-apps/irc'
 import { PrismaClient } from '@twitch-apps/prisma'
+import { PubSub } from '@twitch-apps/pubsub'
 import { ApiClient } from '@twurple/api'
+import { ClientCredentialsAuthProvider } from '@twurple/auth'
 import { ChatUserstate } from '@twurple/auth-tmi/lib/index.js'
 import { ChatMessage } from './chat/index.js'
 import { ChatterState } from './chat/types.js'
@@ -18,6 +21,8 @@ export class Bot {
   private apiClient: ApiClient
   private botClient: Client
   private botCommands: Commands
+  private pubsubClient: PubSub
+  private eventsubClient: EventSub
 
   async connect(): Promise<void> {
     this.prismaClient = new PrismaClient()
@@ -43,15 +48,32 @@ export class Bot {
     })
 
     this.apiClient = new ApiClient({ authProvider: this.authProvider })
-
     const botInfo = await this.apiClient.users.getMe()
+
+    this.eventsubClient = new EventSub({
+      apiClient: new ApiClient({
+        authProvider: new ClientCredentialsAuthProvider(
+          config.CLIENT_ID,
+          config.CLIENT_SECRET
+        )
+      }),
+      strictHostCheck: true,
+      secret: config.CLIENT_ID
+    })
+
+    await this.eventsubClient.listen()
+
+    this.pubsubClient = new PubSub(this.authProvider)
+    await this.pubsubClient.start()
 
     this.ircClient = new IrcClient(this.authProvider, botInfo.displayName)
 
     this.botClient = new Client(
       this.ircClient,
       this.apiClient,
-      this.prismaClient
+      this.prismaClient,
+      this.pubsubClient,
+      this.eventsubClient
     )
 
     this.botCommands = new Commands(this.botClient)
