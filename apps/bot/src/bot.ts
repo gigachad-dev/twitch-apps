@@ -10,7 +10,7 @@ import { ChatMessage } from './chat/index.js'
 import { ChatterState } from './chat/types.js'
 import { Client } from './client.js'
 import { Commands } from './commands/model/commands.js'
-import { CommandParser } from './commands/model/parser.js'
+import { parseArgs, parseMessage } from './commands/model/index.js'
 import { config } from './config.js'
 import { scopes } from './constants.js'
 
@@ -92,11 +92,18 @@ export class Bot {
     if (self) return
 
     const chatter = { ...userstate, message: messageText } as ChatterState
-    const msg = new ChatMessage(this.botClient, chatter, channel)
+    const msg = new ChatMessage(
+      this.botClient,
+      chatter,
+      this.botCommands,
+      channel
+    )
 
-    const commandArgs = CommandParser.parse(messageText)
-    if (commandArgs) {
-      const command = this.botCommands.getRegisteredCommand(commandArgs.command)
+    const parsedMessage = parseMessage(messageText)
+    if (parsedMessage) {
+      const command = this.botCommands.getRegisteredCommand(
+        parsedMessage.command
+      )
       if (command) {
         const isValidUserlevel = command.validateUserlevel(msg)
         if (typeof isValidUserlevel === 'string') {
@@ -104,11 +111,8 @@ export class Bot {
           return
         }
 
-        if (command.options.args.length) {
-          command.prepareRun(msg, commandArgs.args)
-        } else {
-          command.run(msg, commandArgs.args)
-        }
+        const parsedArgs = parseArgs(command.options.args, parsedMessage.args)
+        command.run(msg, parsedArgs ?? parsedMessage.args)
       }
     }
   }
